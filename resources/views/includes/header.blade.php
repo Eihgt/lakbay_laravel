@@ -1,8 +1,6 @@
 <?php
     $title_page = 'LAKBAY Reservation System';
 ?>
-    @include('classes.navigation');
-    @include('classes.authentication');
 
 
 <!DOCTYPE html>
@@ -78,20 +76,22 @@
 <body class="d-flex">
     
     <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
-        <?php if(!empty($_SESSION['loggedIn'])): ?>
+        <?php if(empty($_SESSION['loggedIn'])): ?>
         <header class="mb-auto">
             <div>
                 <!-- <h3 class="float-md-start mb-0">LAKBAY</h3> -->
-                <a class="navbar-brand float-md-start mb-0 flex-row d-flex <?php if($navigation->action == 'index') echo 'hidden'; ?>" href="index.php">
+                <a class="navbar-brand float-md-start mb-0 flex-row d-flex" href="{{url('/index')}}">
                     <img src="images/logo.png" alt="" width="150" height="50" class="d-inline-block align-text-top">
                 </a>
                 <nav class="nav nav-masthead justify-content-center float-md-end">
-                    <a class="nav-link <?php if($navigation->active == 'dashboard.php') echo 'active' ?>" aria-current="page" href="dashboard.php">Dashboard</a>
-                    <a class="nav-link <?php if($navigation->active == 'reservations.php') echo 'active' ?>" href="reservations.php">Reservations</a>
-                    <a class="nav-link <?php if($navigation->active == 'events.php') echo 'active' ?>" href="events.php">Events</a>
-                    <a class="nav-link <?php if($navigation->active == 'vehicles.php') echo 'active' ?>" href="vehicles.php">Vehicles</a>
-                    <a class="nav-link <?php if($navigation->active == 'drivers.php') echo 'active' ?>" href="drivers.php">Drivers</a>
-                    <a class="nav-link <?php if($navigation->active == 'requestors.php') echo 'active' ?>" href="requestors.php">Requestors</a>
+                    <a class="nav-link" aria-current="page" href="{{url('/dashboard')}}">Dashboard</a>
+
+                    <a class="nav-link" href="{{url('/reservations')}}">Reservations</a>
+                    <a class="nav-link" href="{{url('/events')}}">Events</a>
+                    <a class="nav-link" href="{{url('/vehicles')}}">Vehicles</a>
+                    <a class="nav-link" href="{{url('/drivers')}}">Drivers</a>
+
+                    <a class="nav-link" href="{{url('/requestors')}}">Requestors</a>
                     <a class="nav-link" href="logout.php">Logout</a>
                 </nav>
             </div>
@@ -100,7 +100,7 @@
             <header class="mb-auto">
             <div>
                 <!-- <h3 class="float-md-start mb-0">LAKBAY</h3> -->
-                <a class="navbar-brand float-md-start mb-0 flex-row d-flex <?php if($navigation->action == 'index') echo 'hidden'; ?>" href="index.php">
+                <a class="navbar-brand float-md-start mb-0 flex-row d-flex" href="{{url('/index')}}">
                     <img src="images/logo.png" alt="" width="150" height="50" class="d-inline-block align-text-top">
                 </a>
                 <nav class="nav nav-masthead justify-content-center float-md-end">

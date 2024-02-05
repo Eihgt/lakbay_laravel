@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DriversController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,4 +21,13 @@ Route::get('/', function () {
 Route::get('/index', function () {
     return view('index');
 });
-Route::get('/',[AuthController::class,'landingPage']);
+Route::get('/dashboard', function () {
+    return view('dashboard');
+});
+Route::get('/reservations', function () {
+    return view('reservations');
+});
+Route::get('/drivers', function () {
+    return view('drivers');
+});
+Route::post('/insertDriver',[DriversController::class,'store']);
