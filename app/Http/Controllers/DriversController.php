@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Drivers;
 use Illuminate\Http\Request;
+use SebastianBergmann\CodeCoverage\Driver\Driver;
 
 class DriversController extends Controller
 {
@@ -44,7 +45,9 @@ class DriversController extends Controller
      */
     public function show(Drivers $drivers)
     {
-        //
+
+        $drivers = Drivers::all();
+        return view('drivers',compact('drivers'));
     }
 
     /**
