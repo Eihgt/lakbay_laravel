@@ -17,10 +17,7 @@ class DriversFactory extends Factory
     public function definition(): array
     {
         return [
-            'dr_emp_id' => fake()->unique()->randomNumber(4,true),
-            'dr_name' => fake()->name(),
-            'dr_office' => fake()->company(),
-            'dr_status' => fake()->name(),
+          
         ];
     }
 }

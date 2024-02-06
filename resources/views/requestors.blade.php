@@ -9,7 +9,7 @@
     </div>
     <div class="row mb-3">
         <div class="col">
-            <form action="" method="POST" class="">
+            <form action="{{url('/insertDriver')}}" method="POST" class="">
                 <div class="card rounded-0">
                     <div class="card-header fs-6 bg-transparent text-dark rounded-0 pt-2 text-uppercase">
                         Input/Filter Form
@@ -75,15 +75,35 @@
                         <td>Actions</td>
                     </tr>
                 </thead>
-                <tbody>
+                {{-- <tbody>
                     <tr>
                         
                     </tr>
                         <tr>
                             <td colspan="6">No records found</td>
                         </tr>
-                </tbody>
+                </tbody> --}}
             </table>
         </div>
+        
+<script type="text/javascript">
+    $(function() {
+
+        var table = $('.table-hover').DataTable({
+            processing: true
+            , serverSide: true
+            , ajax: "{{ route('drivers.show') }}"
+            , columns: [
+            {data: 'requestor_id', name: 'requestor_id'},
+            {data: 'rq_full_name', name: 'rq_full_name'},
+            {data: 'rq_office', name: 'rq_office'},
+            {data: 'action', name: 'action', orderable: false, searchable: false},
+            ]
+
+        });
+
+    });
+
+</script>
     </div>
     @include('includes.footer'); 

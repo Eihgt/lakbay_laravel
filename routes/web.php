@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DriversController;
+use App\Http\Controllers\RequestorsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -38,3 +39,6 @@ Route::get('/requestors', function () {
 });
 Route::post('/insertDriver',[DriversController::class,'store']);
 Route::get('/drivers', [DriversController::class, 'show'])->name('drivers.show');
+
+Route::post('/insertDriver',[RequestorsController::class,'store']);
+Route::get('/drivers', [RequestorsController::class, 'show'])->name('drivers.show');
