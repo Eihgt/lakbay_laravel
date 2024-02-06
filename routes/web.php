@@ -27,5 +27,14 @@ Route::get('/dashboard', function () {
 Route::get('/reservations', function () {
     return view('reservations');
 });
+Route::get('/events', function () {
+    return view('events');
+});
+Route::get('/vehicles', function () {
+    return view('vehicles');
+});
+Route::get('/requestors', function () {
+    return view('requestors');
+});
 Route::post('/insertDriver',[DriversController::class,'store']);
 Route::get('/drivers', [DriversController::class, 'show'])->name('drivers.show');

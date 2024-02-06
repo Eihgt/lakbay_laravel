@@ -1,20 +1,5 @@
-<?php
-    $title_page = 'LAKBAY Reservation System';
-    include_once "includes/header.php";
-    include_once "config/database.php";
-    include_once "classes/authentication.php";
-
-    $database = new Database();
-    $connection = $database->getConnection();
-
-    $authentication = new Authentication($connection);
-    if(isset($_POST["submit"])){
-        $alert = $authentication->login($_POST);
-        if(isset($alert)){
-            echo "<div class='alert alert-info alert-dismissible fade show py-1 px-4 d-flex justify-content-between align-items-center' role='alert'><span>&#8505; &nbsp; $alert</span><button type='button' class='btn fs-4 py-0 px-0' data-bs-dismiss='alert' aria-label='Close'>&times;</button></div>";
-        }
-    }
-?>
+@include("includes.header");
+<link rel="stylesheet" href="{{ asset('css.main.css') }}">
     <div class="row">
         <div class="col">
             <form action="<?php $_SERVER["PHP_SELF"]; ?>" method="POST">
@@ -43,6 +28,4 @@
             </form>
         </div>
     </div>
-<?php
-    include_once "includes/footer.php"
-?>
+   @include("includes.footer");

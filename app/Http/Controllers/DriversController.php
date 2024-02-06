@@ -45,7 +45,6 @@ class DriversController extends Controller
      */
     public function show(Request $request)
     {
-
         if ($request->ajax()) {
             $data = Drivers::select('*');
             return Datatables::of($data)

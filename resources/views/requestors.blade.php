@@ -1,110 +1,89 @@
 <?php
-class Requestors{
-    private $connection;
-    private $table = "requestors";
-    public $filter = '';
-
-    public $page_limit = 10;
-    public $page;
-    public $starting_limit;
-    public $total_results;
-    public $total_pages;
-
-
-    public function __construct($database){
-        $this->connection = $database;
-    }
-
-    public function setFilter($value){
-        return $this->filter = $value;
-    }
-
-    public function index(){
-        $this->pagination();
-        $this->setTotalPages();
-        $this->setPage();
-        $this->setStartingLimit();
-
-        $querystring = "SELECT * FROM $this->table";
-        if(!empty($this->filter)){
-            $querystring .= " WHERE requestor_id LIKE '%$this->filter%' OR rq_full_name LIKE '%$this->filter%' OR rq_office LIKE '%$this->filter%'";
-        }
-        $querystring .= " ORDER BY requestor_id DESC LIMIT $this->starting_limit, $this->page_limit";
-        $statement = $this->connection->query($querystring);
-        return $statement->fetchAll(PDO::FETCH_OBJ);
-    }
-
-    public function pagination(){
-        $querystring = "SELECT count(requestor_id) FROM $this->table";
-        $statement = $this->connection->query($querystring);
-        return $this->total_results = $statement->fetchColumn();
-    }
-
-    public function setTotalPages(){
-        return $this->total_pages = ceil($this->total_results / $this->page_limit);
-    }
-
-    public function setPage(){
-        return $this->page = isset($_GET['page']) ? $_GET['page'] : 1;
-    }
-
-    public function setStartingLimit(){
-        return $this->starting_limit = ($this->page - 1) * $this->page_limit;
-    }
-    
-    public function create($request){
-        $this->connection->beginTransaction();
-        $data = [];
-        foreach($request as $key => $value) {
-            if($key != 'submit' && $key != 'requestor_id'){
-                if(empty($value)) return "$key field is required";
-                $data[$key] = strip_tags($value);
-            } 
-        }
-        try{
-            $querystring = "INSERT INTO $this->table (rq_full_name, rq_office) VALUES (:rq_full_name, :rq_office)";
-            $statement= $this->connection->prepare($querystring);
-            $statement->execute($data);
-            $this->connection->commit();
-            return 'Requestor has successfully created!';
-        }catch(Exception $e){
-            $this->connection->rollBack();
-            return "Something went wrong with your query!".$e;
-        }
-    }
-
-    public function edit($id){
-        $querystring = "SELECT * FROM $this->table WHERE requestor_id = $id";
-        $statement = $this->connection->query($querystring);
-        return $statement->fetch();
-    }
-
-    public function update($id, $request){
-        $this->connection->beginTransaction();
-        try{
-            $querystring = "UPDATE $this->table SET rq_full_name = ?, rq_office = ? WHERE requestor_id = ?";
-            $statement= $this->connection->prepare($querystring);
-            $statement->execute([$request['rq_full_name'], $request['rq_office'], $id]);
-            $this->connection->commit();
-            return "Data has been successfully updated!";
-        }catch(Exception $e){
-            $this->connection->rollBack();
-            return "Something went wrong with your query!";
-        }
-    }
-
-    public function delete($id){
-        $this->connection->beginTransaction();
-        try{
-            $querystring = "DELETE FROM $this->table WHERE requestor_id = ?";
-            $statement= $this->connection->prepare($querystring);
-            $statement->execute([$id]);
-            $this->connection->commit();
-            return "Data has been successfully deleted!";
-        }catch(Exception $e){
-            $this->connection->rollBack();
-            return "Something went wrong with your query!";
-        }
-    }
-}
+    $title_page = 'LAKBAY Reservation System';
 ?>
+  @include('includes.header');
+    <div class="row">
+        <div class="col">
+            <h4 class="text-uppercase">requestors</h4>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col">
+            <form action="" method="POST" class="">
+                <div class="card rounded-0">
+                    <div class="card-header fs-6 bg-transparent text-dark rounded-0 pt-2 text-uppercase">
+                        Input/Filter Form
+                    </div>
+                    <div class="card-body">
+                        <input type="hidden" name="requestor_id" value="<?php if(isset($edit_data)) echo $edit_data['requestor_id']; ?>">
+                        <div class="row">
+                            <div class="col">
+                                <div class="mb-2">
+                                    <label for="rq_full_name" class="form-label mb-0">Full Name</label>
+                                    <input type="text" class="form-control rounded-1" name="rq_full_name" placeholder="Enter requestor name" value="<?php if(isset($edit_data)) echo $edit_data['rq_full_name']; ?>">
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="mb-2">
+                                    <label for="rq_office" class="form-label mb-0">Office</label>
+                                    <input type="text" class="form-control rounded-1" name="rq_office" placeholder="Enter requestor's offce" value="<?php if(isset($edit_data)) echo $edit_data['rq_office']; ?>">
+                                </div>
+                            </div>
+                            <div class="col"></div>
+                            <div class="col btn-group">
+                                <button type="submit" name="submit" value="insert" class="btn btn-outline-primary h-50 mt-4 px-4 py-1 w-100 rounded-1">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-7">
+            <nav aria-label="...">
+                <ul class="pagination rounded-1">
+                    <li class="page-item disabled">
+                        <a class="page-link rounded-0" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link rounded-0" href="#">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="col-5">
+            <div class="row">
+                <form action="" method="POST" class="w-100">
+                    <div class="input-group flex-nowrap">
+                        <span class="input-group-text rounded-0" id="addon-wrapping">Filter</span>
+                        <input type="text" name="keyword" class="form-control rounded-0" placeholder="Enter Keyword" aria-label="Username" aria-describedby="addon-wrapping">
+                        <button class="btn btn-outline-secondary rounded-0 px-4" type="submit" name="submit" value="filter">Go</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <td>ID</td>
+                        <td>Full Name</td>
+                        <td>Office</td>
+                        <td>Actions</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        
+                    </tr>
+                        <tr>
+                            <td colspan="6">No records found</td>
+                        </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @include('includes.footer'); 
