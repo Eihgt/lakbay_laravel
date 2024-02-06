@@ -22,11 +22,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Paginator::useBootstrap();
-
-        View::composer('*', function ($view) {
-            $navbars = Navigation::orderBy('ordering')->get();
-            $view->with('navbars', $navbars);
-        });
+        
     }
 }
