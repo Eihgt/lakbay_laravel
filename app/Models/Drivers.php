@@ -8,5 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Drivers extends Model
 {
     use HasFactory;
-    public $timestamps = false;
+    protected $fillable=[
+        'dr_emp_id',
+        'dr_name',
+        'dr_office',
+        'dr_status',
+    ];
 }

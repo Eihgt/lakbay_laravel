@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('dashboard');
 Route::get('/index', function () {
     return view('index');
 });
@@ -28,4 +28,4 @@ Route::get('/reservations', function () {
     return view('reservations');
 });
 Route::post('/insertDriver',[DriversController::class,'store']);
-Route::get('/drivers', [DriversController::class, 'show']);
+Route::get('/drivers', [DriversController::class, 'show'])->name('drivers.show');

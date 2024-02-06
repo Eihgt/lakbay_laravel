@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Drivers;
 use Illuminate\Http\Request;
-use SebastianBergmann\CodeCoverage\Driver\Driver;
+use Yajra\DataTables\DataTables;
 
 class DriversController extends Controller
 {
@@ -36,18 +36,29 @@ class DriversController extends Controller
         $drivers->dr_status = $request->dr_status;
         $drivers->save();
 
-        return redirect('/drivers');
+        return redirect('/driver');
 
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Drivers $drivers)
+    public function show(Request $request)
     {
 
-        $drivers = Drivers::all();
-        return view('drivers',compact('drivers'));
+        if ($request->ajax()) {
+            $data = Drivers::select('*');
+            return Datatables::of($data)
+                ->addIndexColumn()
+                ->addColumn('action', function ($row) {
+                    $btn = '<a href="javascript:void(0)" class="edit btn btn-primary btn-sm">View</a>';
+                    return $btn;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+
+        return view('drivers');
     }
 
     /**
