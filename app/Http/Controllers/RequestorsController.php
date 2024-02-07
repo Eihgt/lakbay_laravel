@@ -48,9 +48,10 @@ class RequestorsController extends Controller
             $data = Requestors::select('*');
             return Datatables::of($data)
                 ->addIndexColumn()
-                ->addColumn('action', function ($row) {
-                    $btn = '<a href="javascript:void(0)" class="edit btn btn-primary btn-sm">View</a>';
-                    return $btn;
+                ->addColumn('action', function ($data) {
+                    $button= '<button type="button" name="edit" id="' . $data->requestor_id . '" class="edit btn btn-primary btn-sm">Edit</button>';
+                    $button.= '<button type="button" name="delete" id="' . $data->requestor_id . '" class="delete btn btn-danger btn-sm">Delete</button>';
+                    return $button;
                 })
                 ->rawColumns(['action'])
                 ->make(true);
@@ -62,9 +63,13 @@ class RequestorsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Requestors $drivers)
+    public function edit($requestor_id)
     {
         //
+        if (request()->ajax()) {
+            $data = Requestors::findOrFail($requestor_id);
+            return response()->json(['result' => $data]);
+        }
     }
 
     /**
@@ -78,9 +83,11 @@ class RequestorsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Requestors $drivers)
+    public function destroy($requestor_id)
     {
         //
+        $data =Requestors::findOrFail($requestor_id);
+        $data->delete();
     }
     
 }
