@@ -89,7 +89,7 @@
         <header class="mb-auto">
             <div>
                 <!-- <h3 class="float-md-start mb-0">LAKBAY</h3> -->
-                <a class="navbar-brand float-md-start mb-0 flex-row d-flex" href="{{url('/index')}}">
+                <a class="navbar-brand float-md-start mb-0 flex-row d-flex" href="{{url('/')}}">
                     <img src="images/logo.png" alt="" width="150" height="50" class="d-inline-block align-text-top">
                 </a>
                 <nav class="nav nav-masthead justify-content-center float-md-end">
