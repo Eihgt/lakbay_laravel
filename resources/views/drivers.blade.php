@@ -74,6 +74,9 @@
         </tbody>
     </table>
 </div>
+<?php $test = fake()->lexify('PGO-???');
+echo strtoupper($test);
+?>
 
 </body>
 
@@ -100,6 +103,7 @@
 </body>
 @include('includes.footer')
 </html>
+
 
 
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DriversController;
+use App\Http\Controllers\OfficesController;
 use App\Http\Controllers\RequestorsController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,10 +17,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Route::get('/', function () {
+//     return view('welcome');
+// });
 Route::get('/', function () {
-    return view('welcome');
-});
-Route::get('/index', function () {
     return view('index');
 });
 Route::get('/dashboard', function () {
@@ -39,6 +40,7 @@ Route::get('/requestors', function () {
 });
 Route::post('/insertDriver',[DriversController::class,'store']);
 Route::get('/drivers', [DriversController::class, 'show'])->name('drivers.show');
-
-Route::post('/insertDriver',[RequestorsController::class,'store']);
-Route::get('/requestors', [RequestorsController::class, 'show'])->name('requestors.show');
+Route::get('/offices', [OfficesController::class, 'show'])->name('offices.show');
+Route::get('/delete-office/{off_id}', [OfficesController::class, 'destroy']);
+Route::get('/edit-office/{off_id}', [OfficesController::class, 'edit']);
+Route::post('/update-office', [OfficesController::class, 'update']);
