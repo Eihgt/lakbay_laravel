@@ -56,9 +56,7 @@
             <div class="row">
                 <form action="" method="POST" class="w-100">
                     <div class="input-group flex-nowrap">
-                        <span class="input-group-text rounded-0" id="addon-wrapping">Filter</span>
-                        <input type="text" name="keyword" class="form-control rounded-0" placeholder="Enter Keyword" aria-label="Username" aria-describedby="addon-wrapping">
-                        <button class="btn btn-outline-secondary rounded-0 px-4" type="submit" name="submit" value="filter">Go</button>
+                        
                     </div>
                 </form>
             </div>
@@ -92,7 +90,7 @@
         var table = $('.table-hover').DataTable({
             processing: true
             , serverSide: true
-            , ajax: "{{ route('drivers.show') }}"
+            , ajax: "{{ route('requestors.show') }}"
             , columns: [
             {data: 'requestor_id', name: 'requestor_id'},
             {data: 'rq_full_name', name: 'rq_full_name'},

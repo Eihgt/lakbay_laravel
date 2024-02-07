@@ -41,4 +41,4 @@ Route::post('/insertDriver',[DriversController::class,'store']);
 Route::get('/drivers', [DriversController::class, 'show'])->name('drivers.show');
 
 Route::post('/insertDriver',[RequestorsController::class,'store']);
-Route::get('/drivers', [RequestorsController::class, 'show'])->name('drivers.show');
+Route::get('/requestors', [RequestorsController::class, 'show'])->name('requestors.show');

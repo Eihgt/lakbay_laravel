@@ -37,7 +37,6 @@ class DriversController extends Controller
         $drivers->save();
 
         return redirect('/driver');
-
     }
 
     /**
