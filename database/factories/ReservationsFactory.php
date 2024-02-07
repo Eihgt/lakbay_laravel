@@ -1,0 +1,38 @@
+<?php
+
+namespace Database\Factories;
+use App\Models\Events;
+use App\Models\Driver;
+use App\Models\Drivers;
+use App\Models\Requestors;
+use App\Models\Vehicles;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Reservations>
+ */
+class ReservationsFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'rs_voucher' => fake()->randomNumber(),
+            'rs_daily_transport' => fake()->boolean(),
+            'rs_outside_province' => fake()->boolean(),
+            'rs_date_filed' => fake()->date(),
+            'rs_approval_status' => fake()->randomElement(['Pending', 'Approved', 'Rejected']),
+            'rs_status' => fake()->randomElement(['Active', 'Inactive','Cancelled']),
+            'event_id' => fake()->numberBetween(1,10), // Assuming event_id is a foreign key
+            'driver_id' => fake()->numberBetween(1,10), // Assuming driver_id is a foreign key
+            'vehicle_id' => fake()->numberBetween(1,10), // Assuming vehicle_id is a foreign key
+            'requestor_id' => fake()->numberBetween(1,10), // Assuming requestor_id is a foreign key
+            'created_at' => fake()->dateTimeBetween('-1 year', 'now'),
+            'updated_at' => fake()->dateTimeBetween('-1 year', 'now'),
+        ];
+    }
+}

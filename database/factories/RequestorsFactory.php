@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Carbon;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Requestors>
@@ -18,11 +17,9 @@ class RequestorsFactory extends Factory
     public function definition(): array
     {
         return [
-            'requestor_id' => fake()->unique()->randomNumber(3,true),
+            // 'requestors_id' => fake()->randomNumber(),
             'rq_full_name' => fake()->name(),
-            'rq_office' => fake()->company(),
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
+            'rq_office' => fake()->name(),
         ];
     }
 }
