@@ -1,35 +1,7 @@
 <?php
     $title_page = 'LAKBAY Reservation System';
-    @include('includes.header');
-
-
-
-    // load dropdowns
-    // $drivers = $reservations->loaddropdown('drivers', 'driver_id', 'dr_name');
-    // $vehicles = $reservations->loaddropdown('vehicles', 'vehicle_id', 'vh_plate_number');
-    // $events = $reservations->loaddropdown('events', 'event_id', 'ev_name');
-    // $requestors = $reservations->loaddropdown('requestors', 'requestor_id', 'rq_full_name');
-
-    if($_POST){
-        if(isset($_POST['submit'])){
-            if($_POST['submit'] == 'insert' && $_POST['reservation_id'] == ''){
-                $alert = $reservations->create($_POST);
-            }elseif($_POST['submit'] == 'insert' && $_POST['reservation_id'] != ''){
-                $alert = $reservations->update($_POST['reservation_id'], $_POST);
-            }elseif($_POST['submit'] == 'filter'){
-                $reservations->setFilter($_POST['keyword']);
-                $alert = "Filtered table using keyword: ".$_POST['keyword'];
-            }else{
-                $edit_data = $reservations->edit($_POST['submit']);
-            }
-        }elseif(isset($_POST['delete'])){
-            $alert = $reservations->delete($_POST['delete']);
-        }
-        if(isset($alert)){
-            echo "<div class='alert alert-info alert-dismissible fade show py-1 px-4 d-flex justify-content-between align-items-center' role='alert'><span>&#8505; &nbsp; $alert</span><button type='button' class='btn fs-4 py-0 px-0' data-bs-dismiss='alert' aria-label='Close'>&times;</button></div>";
-        }
-    }
 ?>
+ @include('includes.header');
 
 <div class="row">
     <div class="col">
@@ -51,9 +23,7 @@
                                 <label for="event_id" class="form-label mb-0">Event Name</label>
                                 <select class="form-select" name="event_id">
                                     <option value="">Select an event</option>
-                                    <?php foreach($events as $event){ ?>
-                                    <option value="<?php echo $event->event_id; ?>" <?php if(isset($edit_data) && $edit_data['ev_name'] == $event->ev_name) echo 'selected'; ?>><?php echo $event->ev_name; ?></option>
-                                    <?php } ?>
+                                    
                                 </select>
                             </div>
                         </div>
@@ -62,9 +32,7 @@
                                 <label for="driver_id" class="form-label mb-0">Driver</label>
                                 <select class="form-select" name="driver_id">
                                     <option value="">Select driver</option>
-                                    <?php foreach($drivers as $driver): ?>
-                                    <option value="<?php echo $driver->driver_id; ?>" <?php if(isset($edit_data) && $edit_data['dr_name'] == $driver->dr_name) echo 'selected'; ?>><?php echo $driver->dr_name; ?></option>
-                                    <?php endforeach; ?>
+                                 
                                 </select>
                             </div>
                         </div>
@@ -75,9 +43,7 @@
                                 <label for="vehicle_id" class="form-label mb-0">Vehicle</label>
                                 <select class="form-select" name="vehicle_id">
                                     <option value="">Select vehicle</option>
-                                    <?php foreach($vehicles as $vehicle): ?>
-                                    <option value="<?php echo $vehicle->vehicle_id; ?>" <?php if(isset($edit_data) && $edit_data['vh_plate_number'] == $vehicle->vh_plate_number) echo 'selected'; ?>><?php echo $vehicle->vh_plate_number; ?></option>
-                                    <?php endforeach; ?>
+                                   
                                 </select>
                             </div>
                         </div>
@@ -86,9 +52,7 @@
                                 <label for="requestor_id" class="form-label mb-0">Requestor</label>
                                 <select class="form-select" name="requestor_id">
                                     <option value="">Select requestor</option>
-                                    <?php foreach($requestors as $requestor): ?>
-                                    <option value="<?php echo $requestor->requestor_id; ?>" <?php if(isset($edit_data) && $edit_data['rq_full_name'] == $requestor->rq_full_name) echo 'selected'; ?>><?php echo $requestor->rq_full_name; ?></option>
-                                    <?php endforeach; ?>
+                                  
                                 </select>
                             </div>
                         </div>
@@ -168,13 +132,7 @@
                 <li class="page-item disabled">
                     <a class="page-link rounded-0" href="#" tabindex="-1" aria-disabled="true">Previous</a>
                 </li>
-                <?php for($reservations->page = 1; $reservations->page <= $reservations->total_pages ; $reservations->page++):?>
-                <li class="page-item active" aria-current="page">
-                    <a href='<?php echo "?page=$reservations->page"; ?>' class="links">
-                        <?php echo $reservations->page; ?>
-                    </a>
-                </li>
-                <?php endfor; ?>
+             
                 <li class="page-item">
                     <a class="page-link rounded-0" href="#">Next</a>
                 </li>
@@ -213,60 +171,10 @@
                 </tr>
             </thead>
             <tbody>
-                <?php if(count($reservations->index()) > 0): foreach ($reservations->index() as $reservation): ?>
-                <tr>
-                    <td><?php echo $reservation->reservation_id; ?></td>
-                    <td><?php echo $reservation->ev_name; ?></td>
-                    <td><?php echo $reservation->dr_name; ?></td>
-                    <td><?php echo $reservation->vh_plate_number; ?></td>
-                    <td><?php echo $reservation->rq_full_name; ?></td>
-                    <td><?php echo $reservation->rs_voucher; ?></td>
-                    <td><?php echo $reservation->rs_daily_transport; ?></td>
-                    <td><?php echo $reservation->rs_outside_province; ?></td>
-                    <td><?php echo $reservation->rs_date_filed; ?></td>
-                    <td><?php echo $reservation->rs_approval_status; ?></td>
-                    <td><?php echo $reservation->rs_status; ?></td>
-                    <td class="p-1 m-0">
-                        <div class="btn-group w-100" role="group">
-                            <form action="" method="POST" class="w-50">
-                                <button type="submit" name="submit" value="<?php echo $reservation->reservation_id ?>" class="btn btn-outline-primary w-100 rounded-0 py-1">Edit</button>
-                            </form>
-                            <button type="button" class="btn btn-outline-danger py-1" data-bs-toggle="modal" data-bs-target="#deletemodal<?php echo $reservation->reservation_id; ?>">
-                                Delete
-                            </button>
-
-                            <!-- Modal -->
-                            <div class="modal fade" id="deletemodal<?php echo $reservation->reservation_id; ?>" tabindex="-1">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header bg-danger text-white py-2">
-                                            <h6 class="modal-title">Caution!</h6>
-                                            <button type="button" class="btn text-white fs-4 py-0" data-bs-dismiss="modal" aria-label="Close">&times;</button>
-                                        </div>
-                                        <div class="modal-body">
-                                            Are you sure you want to delete reservation for <b><?php echo $reservation->rq_full_name ?></b>?
-                                        </div>
-                                        <div class="modal-footer py-1">
-                                            <button type="button" class="btn btn-outline-secondary rounded-0 w-25 btn-sm" data-bs-dismiss="modal">Close</button>
-                                            <form action="" method="POST" class="w-25">
-                                                <button type="submit" name="delete" value="<?php echo $reservation->reservation_id ?>" class="btn btn-outline-danger rounded-0 w-100 btn-sm">Delete</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-                <?php endforeach; else: ?>
-                <tr>
-                    <td colspan="6">No records found</td>
-                </tr>
-                <?php endif; ?>
+               
             </tbody>
         </table>
     </div>
 </div>
-<?php
-    include_once "includes/footer.php"
-?>
+@include('includes.footer');
+

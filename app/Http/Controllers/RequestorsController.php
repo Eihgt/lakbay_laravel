@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Drivers;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
+use App\Models\Requestors;
 
-class DriversController extends Controller
+
+class RequestorsController extends Controller
 {
-    /**
+     /**
      * Display a listing of the resource.
      */
     public function index()
@@ -29,15 +30,13 @@ class DriversController extends Controller
      */
     public function store(Request $request)
     {
-        $drivers = new Drivers();
-        $drivers->dr_emp_id=$request->dr_emp_id;
-        $drivers->dr_name = $request->dr_name ;
-        $drivers->dr_office = $request->dr_office;
-        $drivers->dr_status = $request->dr_status;
-        $drivers->save();
+        $req = new Requestors();
+        $req->requestor_id=$request->requestor_id;
+        $req->rq_full_name = $request->rq_full_name;
+        $req->rq_office = $request->rq_office;
+        $req->save();
 
-        return redirect('/driver');
-
+        return redirect('/requestors');
     }
 
     /**
@@ -46,7 +45,7 @@ class DriversController extends Controller
     public function show(Request $request)
     {
         if ($request->ajax()) {
-            $data = Drivers::select('*');
+            $data = Requestors::select('*');
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('action', function ($row) {
@@ -57,13 +56,13 @@ class DriversController extends Controller
                 ->make(true);
         }
 
-        return view('drivers');
+        return view('requestors');
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Drivers $drivers)
+    public function edit(Requestors $drivers)
     {
         //
     }
@@ -71,7 +70,7 @@ class DriversController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Drivers $drivers)
+    public function update(Request $request, Requestors $drivers)
     {
         //
     }
@@ -79,8 +78,9 @@ class DriversController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Drivers $drivers)
+    public function destroy(Requestors $drivers)
     {
         //
     }
+    
 }
