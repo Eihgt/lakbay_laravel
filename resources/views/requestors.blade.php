@@ -9,7 +9,7 @@
     </div>
     <div class="row mb-3">
         <div class="col">
-            <form action="{{url('/insertDriver')}}" method="POST" class="">
+            <form action="{{url('/insertRequestors')}}" method="POST" class="">
                 <div class="card rounded-0">
                     <div class="card-header fs-6 bg-transparent text-dark rounded-0 pt-2 text-uppercase">
                         Input/Filter Form
@@ -40,31 +40,6 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-7">
-            <nav aria-label="...">
-                <ul class="pagination rounded-1">
-                    <li class="page-item disabled">
-                        <a class="page-link rounded-0" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link rounded-0" href="#">Next</a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-        <div class="col-5">
-            <div class="row">
-                <form action="" method="POST" class="w-100">
-                    <div class="input-group flex-nowrap">
-                        <span class="input-group-text rounded-0" id="addon-wrapping">Filter</span>
-                        <input type="text" name="keyword" class="form-control rounded-0" placeholder="Enter Keyword" aria-label="Username" aria-describedby="addon-wrapping">
-                        <button class="btn btn-outline-secondary rounded-0 px-4" type="submit" name="submit" value="filter">Go</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <div class="row">
         <div class="col">
             <table class="table table-bordered table-hover">
                 <thead>
@@ -85,14 +60,44 @@
                 </tbody> --}}
             </table>
         </div>
-        
-<script type="text/javascript">
-    $(function() {
+        <span id="form_result" name="form_result"></span>
 
+        
+<!--- DELETE MODAL --->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" id="sample_form" class="form-horizontal">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalLabel">Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h4 align="center" style="margin:0;">Are you sure you want to remove this data?</h4>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger">OK</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!--- DELETE MODAL --->
+
+
+ 
+<script type="text/javascript">
+    $(document).ready(function() {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
         var table = $('.table-hover').DataTable({
             processing: true
             , serverSide: true
-            , ajax: "{{ route('drivers.show') }}"
+            , ajax: "{{ route('requestors.show') }}"
             , columns: [
             {data: 'requestor_id', name: 'requestor_id'},
             {data: 'rq_full_name', name: 'rq_full_name'},
@@ -102,7 +107,97 @@
 
         });
 
+            $('#sample_form').on('submit', function(event){
+        event.preventDefault(); 
+        var action_url = '';
+        if($('#action').val() == 'Edit')
+        {
+            action_url = "{{ url('/update-office') }}";
+
+        }
+        $.ajax({
+            type: 'post',
+            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+            url: action_url,
+            data:$(this).serialize(),
+            dataType: 'json',
+            success: function(data) {
+                console.log('success: '+data);
+                var html = '';
+                if(data.errors)
+                {
+                    html = '<div class="alert alert-danger">';
+                    for(var count = 0; count < data.errors.length; count++)
+                    {
+                        html += '<p>' + data.errors[count] + '</p>';
+                    }
+                    html += '</div>';
+                }
+                if(data.success)
+                {
+                    html = "<div class='alert alert-info alert-dismissible fade show py-1 px-4 d-flex justify-content-between align-items-center' role='alert'><span>&#8505; &nbsp;"+data.success+"</span><button type='button' class='btn fs-4 py-0 px-0' data-bs-dismiss='alert' aria-label='Close'>&times;</button></div>";
+                    $('#office-table').DataTable().ajax.reload();
+                    $('#formModal').modal('hide');
+                    $('#sample_form')[0].reset();
+                    
+                }
+                $('#form_result').html(html);
+            },
+            error: function(data) {
+                var errors = data.responseJSON;
+                console.log(errors);
+            }
+        });
     });
+            //EDIT---------------------------//
+             $(document).on('click', '.edit', function(event){
+             event.preventDefault();
+             var off_id= $(this).attr('id');
+            //  alert(off_id);
+             $('#form_result').html('');
+             $.ajax({
+             url :"/edit-office/"+off_id+"/",
+             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+             dataType:"json",
+             success:function(data)
+             {
+             $('#requestor_id').val(data.result.requestor_id);
+             $('#rq_full_name').val(data.result.rq_full_name);
+             $('#rq_office').val(data.result.rq_office);
+             $('.modal-title').text('Edit Record');
+             $('#action_button').val('Update');
+             $('#action').val('Edit');
+             $('#formModal').modal('show');
+             },
+             error: function(data) {
+             var errors = data.responseJSON;
+             console.log(errors);
+             }
+             })
+             });
+             //EDIT---------------------------//
+             //DELETE---------------------------//
+            var off_id;
+            $(document).on('click', '.delete', function(){
+            off_id = $(this).attr('id');
+
+            $('#confirmModal').modal('show');
+            });
+
+            $('#ok_button').click(function(){
+            $.ajax({
+            url:"/delete-office/"+off_id,
+            success:function(data)
+            {
+            setTimeout(function(){
+            $('#confirmModal').modal('hide');
+            $('#office-table').DataTable().ajax.reload();
+            });
+            }
+            })
+            });
+            //DELETE---------------------------//
+            });
 
 </script>
     </div>
