@@ -17,7 +17,7 @@ class OfficesFactory extends Factory
     public function definition(): array
     {
         return [
-            'off_id' => fake()->unique()->randomNumber(4, true),
+            // 'off_id' => fake()->unique()->randomNumber(4, true),
             'off_acr' => strtoupper(fake()->lexify('PGO-???')),
             'off_name' => fake()->company(),
             'off_head' => fake()->name(),
