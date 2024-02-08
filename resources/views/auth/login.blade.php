@@ -1,31 +1,48 @@
-@include("includes.header");
-<link rel="stylesheet" href="{{ asset('css.main.css') }}">
-    <div class="row">
-        <div class="col">
-            <form action="<?php $_SERVER["PHP_SELF"]; ?>" method="POST">
-                <p>Enter Credentials</p>
-                <div class="row">
-                    <div class="col">
-                        <div class="mb-2">
-                            <label for="username" class="form-label mb-0">Username</label>
-                            <input type="text" class="form-control rounded-1" name="username" placeholder="Enter event name" value="<?php if(isset($edit_data)) echo $edit_data['ev_name']; ?>">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <div class="mb-2">
-                            <label for="password" class="form-label mb-0">Password</label>
-                            <input type="password" class="form-control rounded-1" name="password" placeholder="Enter event's venue" value="<?php if(isset($edit_data)) echo $edit_data['ev_venue']; ?>">
-                        </div>
-                    </div>
-                </div>
-                <div class="row mt-2 d-flex justify-content-end align-items-center">
-                    <div class="col-3 btn-group">
-                        <button type="submit" name="submit" value="submit" class="btn btn-outline-primary px-4 py-1 w-100 rounded-1">Submit</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-   @include("includes.footer");
+<x-guest-layout>
+    <x-authentication-card>
+        <x-slot name="logo">
+            <x-authentication-card-logo />
+        </x-slot>
+
+        <x-validation-errors class="mb-4" />
+
+        @if (session('status'))
+            <div class="mb-4 font-medium text-sm text-green-600">
+                {{ session('status') }}
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('login') }}">
+            @csrf
+
+            <div>
+                <x-label for="email" value="{{ __('Email') }}" />
+                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+            </div>
+
+            <div class="mt-4">
+                <x-label for="password" value="{{ __('Password') }}" />
+                <x-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="current-password" />
+            </div>
+
+            <div class="block mt-4">
+                <label for="remember_me" class="flex items-center">
+                    <x-checkbox id="remember_me" name="remember" />
+                    <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+                </label>
+            </div>
+
+            <div class="flex items-center justify-end mt-4">
+                @if (Route::has('password.request'))
+                    <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
+                        {{ __('Forgot your password?') }}
+                    </a>
+                @endif
+
+                <x-button class="ms-4">
+                    {{ __('Log in') }}
+                </x-button>
+            </div>
+        </form>
+    </x-authentication-card>
+</x-guest-layout>

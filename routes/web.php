@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DriversController;
 use App\Http\Controllers\OfficesController;
 use App\Http\Controllers\RequestorsController;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,9 +18,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+
 Route::get('/', function () {
     return view('index');
 });
@@ -39,6 +38,7 @@ Route::get('/requestors', function () {
     return view('requestors');
 });
 
+Route::get('/',[Controller::class,'redirect']);
 
 Route::post('/insertRequestors',[RequestorsController::class,'store']);
 Route::get('/requestors', [RequestorsController::class, 'show'])->name('requestors.show');

@@ -93,16 +93,30 @@
                     <img src="images/logo.png" alt="" width="150" height="50" class="d-inline-block align-text-top">
                 </a>
                 <nav class="nav nav-masthead justify-content-center float-md-end">
-                    <a class="nav-link" aria-current="page" href="{{url('/dashboard')}}">Dashboard</a>
+                   
+                    @guest
+        <a class="nav-link" href="{{ route('login') }}">Login</a>
+        <a class="nav-link" href="{{ route('register') }}">Register</a>
+    @endguest
+    @auth
+        <!-- Add logout link or dropdown menu for user profile -->
+        <a class="nav-link" aria-current="page" href="{{url('/dashboard')}}">Dashboard</a>
+        <a class="nav-link" href="{{url('/reservations')}}">Reservations</a>
+        <a class="nav-link" href="{{url('/events')}}">Events</a>
+        <a class="nav-link" href="{{url('/vehicles')}}">Vehicles</a>
+        <a class="nav-link" href="{{url('/drivers')}}">Drivers</a>
+        <a class="nav-link" href="{{url('/offices')}}">Offices</a>
+        <a class="nav-link" href="{{url('/requestors')}}">Requestors</a>
+        <a class="nav-link" href="{{ route('profile.show') }}">Profile</a>
+        <a class="nav-link" href="{{url('/requestors')}}">
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="nav-link" style="background: none; border: none; cursor: pointer; padding: 0;">Logout</button>
+            </form>
+        </a>
+        
 
-                    <a class="nav-link" href="{{url('/reservations')}}">Reservations</a>
-                    <a class="nav-link" href="{{url('/events')}}">Events</a>
-                    <a class="nav-link" href="{{url('/vehicles')}}">Vehicles</a>
-                    <a class="nav-link" href="{{url('/drivers')}}">Drivers</a>
-                    <a class="nav-link" href="{{url('/offices')}}">Offices</a>
-
-                    <a class="nav-link" href="{{url('/requestors')}}">Requestors</a>
-                    <a class="nav-link" href="logout.php">Logout</a>
+    @endauth
                 </nav>
             </div>
         </header>
@@ -116,7 +130,6 @@
                 <nav class="nav nav-masthead justify-content-center float-md-end">
                     <a class="nav-link" href="login.php">Login</a>
                 </nav>
-
             </div>
         </header>
         <?php endif; ?>
