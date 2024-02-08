@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DriversController;
 use App\Http\Controllers\OfficesController;
 use App\Http\Controllers\RequestorsController;
+use App\Http\Controllers\EventsController;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 
@@ -28,15 +29,13 @@ Route::get('/dashboard', function () {
 Route::get('/reservations', function () {
     return view('reservations');
 });
-Route::get('/events', function () {
-    return view('events');
-});
 Route::get('/vehicles', function () {
     return view('vehicles');
 });
 Route::get('/requestors', function () {
     return view('requestors');
 });
+
 
 Route::get('/',[Controller::class,'redirect']);
 
@@ -45,6 +44,9 @@ Route::get('/requestors', [RequestorsController::class, 'show'])->name('requesto
 
 Route::post('/insertDriver',[DriversController::class,'store']);
 Route::get('/drivers', [DriversController::class, 'show'])->name('drivers.show');
+
+Route::post('/insertEvent', [EventsController::class, 'store']);
+Route::get('/events',[EventsController::class,'show'])->name('get-events');
 
 Route::get('/offices', [OfficesController::class, 'show'])->name('offices.show');
 Route::get('/delete-office/{off_id}', [OfficesController::class, 'destroy']);
