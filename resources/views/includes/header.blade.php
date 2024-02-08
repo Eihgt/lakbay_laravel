@@ -16,10 +16,14 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.0/css/dataTables.bootstrap4.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.bootstrap4.css" />
     <link href="https://cdn.datatables.net/v/dt/dt-1.13.8/b-2.4.2/datatables.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.4/js/dataTables.bootstrap5.min.js"></script>
     <link href="https://cdn.datatables.net/v/dt/dt-1.13.8/datatables.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    
+
+
+    
     
     
 
@@ -113,7 +117,7 @@
         <a class="nav-link" href="{{url('/requestors')}}">Requestors</a>
         <a class="nav-link" href="{{ route('profile.show') }}">Profile</a>
         <a class="nav-link" href="{{url('/requestors')}}">
-            <form method="POST" action="{{ route('logout') }}">
+            <form method="POST" action="{{route('logout') }}">
                 @csrf
                 <button type="submit" class="nav-link" style="background: none; border: none; cursor: pointer; padding: 0;">Logout</button>
             </form>

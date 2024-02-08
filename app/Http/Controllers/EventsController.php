@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\Events;
 use Illuminate\Http\Request;
+use Yajra\DataTables\DataTables;
 
 class EventsController extends Controller
 {
@@ -28,4 +29,21 @@ class EventsController extends Controller
         $events->save();
         return response()->json(['success' => 'Data is successfully updated']);
     }
+    public function show(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = Events::select('*');
+            return Datatables::of($data)
+                ->addIndexColumn()
+                ->addColumn('action', function ($data) {
+                    $button = '<button type="button" name="edit" id="' . $data->off_id . '" class="edit btn btn-primary btn-sm">Edit</button>';
+                    $button .= '<button type="button" name="delete" id="' . $data->off_id . '" class="delete btn btn-danger btn-sm">Delete</button>';
+                    return $button;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+        return view('events');
+
+}
 }
