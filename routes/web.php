@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DriversController;
 use App\Http\Controllers\OfficesController;
 use App\Http\Controllers\RequestorsController;
+use App\Http\Controllers\EventsController;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DataTableAjaxCRUDController;
@@ -30,15 +31,13 @@ Route::get('/dashboard', function () {
 Route::get('/reservations', function () {
     return view('reservations');
 });
-Route::get('/events', function () {
-    return view('events');
-});
 Route::get('/vehicles', function () {
     return view('vehicles');
 });
 Route::get('/requestors', function () {
     return view('requestors');
 });
+
 
 Route::get('/',[Controller::class,'redirect']);
 
@@ -51,6 +50,9 @@ Route::post('delete-requestor', [RequestorsController::class, 'destroy']);
 
 Route::post('/insertDriver',[DriversController::class,'store']);
 Route::get('/drivers', [DriversController::class, 'show'])->name('drivers.show');
+
+Route::post('/insertEvent', [EventsController::class, 'store']);
+Route::get('/events',[EventsController::class,'show'])->name('events.show');
 
 Route::get('/offices', [OfficesController::class, 'show'])->name('offices.show');
 Route::get('/delete-office/{off_id}', [OfficesController::class, 'destroy']);
