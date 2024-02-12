@@ -6,6 +6,8 @@ use App\Http\Controllers\OfficesController;
 use App\Http\Controllers\RequestorsController;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DataTableAjaxCRUDController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -40,8 +42,12 @@ Route::get('/requestors', function () {
 
 Route::get('/',[Controller::class,'redirect']);
 
-Route::post('/insertRequestors',[RequestorsController::class,'store']);
-Route::get('/requestors', [RequestorsController::class, 'show'])->name('requestors.show');
+//Requestors
+Route::get('requestors', [RequestorsController::class, 'index']);
+Route::post('store-requestor', [RequestorsController::class, 'store']);
+Route::post('edit-requestor', [RequestorsController::class, 'edit']);
+Route::post('delete-requestor', [RequestorsController::class, 'destroy']);
+//End-Requestor
 
 Route::post('/insertDriver',[DriversController::class,'store']);
 Route::get('/drivers', [DriversController::class, 'show'])->name('drivers.show');
