@@ -48,9 +48,10 @@ class DriversController extends Controller
             $data = Drivers::select('*');
             return Datatables::of($data)
                 ->addIndexColumn()
-                ->addColumn('action', function ($row) {
-                    $btn = '<a href="javascript:void(0)" class="edit btn btn-primary btn-sm">View</a>';
-                    return $btn;
+                ->addColumn('action', function ($data) {
+                    $button = '<button type="button" name="edit" id="' . $data->driver_id . '" class="edit btn btn-primary btn-sm">Edit</button>';
+                    $button .= '<button type="button" name="delete" id="' . $data->driver_id . '" class="delete btn btn-danger btn-sm">Delete</button>';
+                    return $button;
                 })
                 ->rawColumns(['action'])
                 ->make(true);

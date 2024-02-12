@@ -89,6 +89,51 @@
             </div>
         </form>
     </div>
+    <div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" id="sample_form" class="form-horizontal">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ModalLabel"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        
+                        <div class="form-group">
+                            <label>Event Name : </label>
+                            <input type="text" name="ev_name_modal" id="ev_name_modal" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label>Event Venue : </label>
+                            <input type="text" name="ev_venue_modal" id="ev_venue_modal" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="ev_date_start_modal" class="form-label mb-0">Start Date</label>
+                            <input type="date" class="form-control rounded-1" name="ev_date_start_modal" id="ev_date_start_modal" placeholder="Enter event's start date" value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="ev_time_start_modal" class="form-label mb-0">Start time</label>
+                            <input type="time" class="form-control rounded-1" name="ev_time_start_modal" id="ev_time_start_modal" placeholder="Enter event's start time" value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="ev_date_end_modal" class="form-label mb-0">End Date</label>
+                            <input type="date" class="form-control rounded-1" name="ev_date_end_modal" id="ev_date_end_modal" placeholder="Enter event's end date" value="">
+                        </div>
+                        <div class="form-group">
+                            <label for="ev_time_end_modal" class="form-label mb-0">End Time</label>
+                            <input type="time" class="form-control rounded-1" name="ev_time_end_modal" id="ev_time_end_modal" placeholder="Enter event's end time" value="">
+                        </div>
+                        <input type="hidden" name="action" id="action" value="Add" />
+                        <input type="hidden" name="hidden_id" id="hidden_id" />
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <input type="submit" name="action_button" id="action_button" value="Add" class="btn btn-info" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div> 
 </div>
 <div class="row">
     <div class="col-7">
@@ -131,10 +176,10 @@
                     <td>ID</td>
                     <td>Event Name</td>
                     <td>Venue</td>
-                    <td>Start</td>
-                    <td>End</td>
-                    <td>Date Added</td>
-                    <td>Date Added</td>
+                    <td>Date Start</td>
+                    <td>Time Start</td>
+                    <td>Date End</td>
+                    <td>Time End</td>
                     <td>Actions</td>
                 </tr>
             </thead>
@@ -203,8 +248,8 @@
             , name: 'ev_date_end'
             }
             , {
-            data: 'ev_date_added'
-            , name: 'ev_date_added'
+            data: 'ev_time_end'
+            , name: 'ev_time_end'
             }
 
             , {
@@ -218,95 +263,98 @@
             
 
             });
-        // $('#sample_form').on('submit', function(event) {
-        //     event.preventDefault();
-        //     var action_url = '';
-        //     if ($('#action').val() == 'Edit') {
-        //         action_url = "{{ url('/update-office') }}";
+        $('#sample_form').on('submit', function(event) {
+            event.preventDefault();
+            var action_url = '';
+            if ($('#action').val() == 'Edit') {
+                action_url = "{{ url('/update-event') }}";
 
-        //     }
+            }
 
-        //     $.ajax({
-        //         type: 'post'
-        //         , headers: {
-        //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        //         }
-        //         , url: action_url
-        //         , data: $(this).serialize()
-        //         , dataType: 'json'
-        //         , success: function(data) {
-        //             console.log('success: ' + data);
-        //             var html = '';
-        //             if (data.errors) {
-        //                 html = '<div class="alert alert-danger">';
-        //                 for (var count = 0; count < data.errors.length; count++) {
-        //                     html += '<p>' + data.errors[count] + '</p>';
-        //                 }
-        //                 html += '</div>';
-        //             }
-        //             if (data.success) {
-        //                 html = "<div class='alert alert-info alert-dismissible fade show py-1 px-4 d-flex justify-content-between align-items-center' role='alert'><span>&#8505; &nbsp;" + data.success + "</span><button type='button' class='btn fs-4 py-0 px-0' data-bs-dismiss='alert' aria-label='Close'>&times;</button></div>";
-        //                 $('#office-table').DataTable().ajax.reload();
-        //                 $('#formModal').modal('hide');
-        //                 $('#sample_form')[0].reset();
+            $.ajax({
+                type: 'post'
+                , headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+                , url: action_url
+                , data: $(this).serialize()
+                , dataType: 'json'
+                , success: function(data) {
+                    console.log('success: ' + data);
+                    var html = '';
+                    if (data.errors) {
+                        html = '<div class="alert alert-danger">';
+                        for (var count = 0; count < data.errors.length; count++) {
+                            html += '<p>' + data.errors[count] + '</p>';
+                        }
+                        html += '</div>';
+                    }
+                    if (data.success) {
+                        html = "<div class='alert alert-info alert-dismissible fade show py-1 px-4 d-flex justify-content-between align-items-center' role='alert'><span>&#8505; &nbsp;" + data.success + "</span><button type='button' class='btn fs-4 py-0 px-0' data-bs-dismiss='alert' aria-label='Close'>&times;</button></div>";
+                        $('#office-table').DataTable().ajax.reload();
+                        $('#formModal').modal('hide');
+                        $('#sample_form')[0].reset();
 
-        //             }
-        //             $('#form_result').html(html);
-        //         }
-        //         , error: function(data) {
-        //             var errors = data.responseJSON;
-        //             console.log(errors);
-        //         }
-        //     });
-        // });
-        // //EDIT---------------------------//
-        // $(document).on('click', '.edit', function(event) {
-        //     event.preventDefault();
-        //     var off_id = $(this).attr('id');
-        //     //  alert(off_id);
-        //     $('#form_result').html('');
-        //     $.ajax({
-        //         url: "/edit-office/" + off_id + "/"
-        //         , headers: {
-        //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        //         }
-        //         , dataType: "json"
-        //         , success: function(data) {
-        //             $('#off_acr').val(data.result.off_acr);
-        //             $('#off_name').val(data.result.off_name);
-        //             $('#off_head').val(data.result.off_head);
-        //             $('#hidden_id').val(off_id);
-        //             $('.modal-title').text('Edit Record');
-        //             $('#action_button').val('Update');
-        //             $('#action').val('Edit');
-        //             $('#formModal').modal('show');
-        //         }
-        //         , error: function(data) {
-        //             var errors = data.responseJSON;
-        //             console.log(errors);
-        //         }
-        //     })
-        // });
+                    }
+                    $('#form_result').html(html);
+                }
+                , error: function(data) {
+                    var errors = data.responseJSON;
+                    console.log(errors);
+                }
+            });
+        });
         //EDIT---------------------------//
-        //DELETE---------------------------//
-        // var off_id;
-        // $(document).on('click', '.delete', function() {
-        //     off_id = $(this).attr('id');
+        $(document).on('click', '.edit', function(event) {
+            event.preventDefault();
+            var event_id = $(this).attr('id');
+            //  alert(event_id);
+            $('#form_result').html('');
+            $.ajax({
+                url: "/edit-event/" + event_id + "/"
+                , headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+                , dataType: "json"
+                , success: function(data) {
+                    $('#ev_name_modal').val(data.result.ev_name);
+                    $('#ev_venue_modal').val(data.result.ev_venue);
+                    $('#ev_date_start_modal').val(data.result.ev_date_start);
+                    $('#ev_time_start_modal').val(data.result.ev_time_start);
+                    $('#ev_date_end_modal').val(data.result.ev_date_end);
+                    $('#ev_time_end_modal').val(data.result.ev_time_end);
+                    $('#hidden_id').val(event_id); 
+                    $('.modal-title').text('Edit Record');
+                    $('#action_button').val('Update');
+                    $('#action').val('Edit');
+                    $('#formModal').modal('show');
+                }
+                , error: function(data) {
+                    var errors = data.responseJSON;
+                    console.log(errors);
+                }
+            })
+        });
+        // EDIT---------------------------//
+        // DELETE---------------------------//
+        var off_id;
+        $(document).on('click', '.delete', function() {
+            off_id = $(this).attr('id');
 
-        //     $('#confirmModal').modal('show');
-        // });
+            $('#confirmModal').modal('show');
+        });
 
-        // $('#ok_button').click(function() {
-        //     $.ajax({
-        //         url: "/delete-office/" + off_id
-        //         , success: function(data) {
-        //             setTimeout(function() {
-        //                 $('#confirmModal').modal('hide');
-        //                 $('#office-table').DataTable().ajax.reload();
-        //             });
-        //         }
-        //     })
-        // });
+        $('#ok_button').click(function() {
+            $.ajax({
+                url: "/delete-event/" + off_id
+                , success: function(data) {
+                    setTimeout(function() {
+                        $('#confirmModal').modal('hide');
+                        $('#events-table').DataTable().ajax.reload();
+                    });
+                }
+            })
+        });
         //DELETE---------------------------//
     });
 

@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DriversController;
 use App\Http\Controllers\OfficesController;
 use App\Http\Controllers\RequestorsController;
+use App\Http\Controllers\ReservationsController;
 use App\Http\Controllers\EventsController;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
@@ -28,9 +29,6 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 });
-Route::get('/reservations', function () {
-    return view('reservations');
-});
 Route::get('/vehicles', function () {
     return view('vehicles');
 });
@@ -53,8 +51,12 @@ Route::get('/drivers', [DriversController::class, 'show'])->name('drivers.show')
 
 Route::post('/insertEvent', [EventsController::class, 'store']);
 Route::get('/events',[EventsController::class,'show'])->name('events.show');
+Route::get('/edit-event/{event_id}', [EventsController::class, 'edit']);
+Route::post('/update-event', [EventsController::class, 'update']);
 
 Route::get('/offices', [OfficesController::class, 'show'])->name('offices.show');
 Route::get('/delete-office/{off_id}', [OfficesController::class, 'destroy']);
 Route::get('/edit-office/{off_id}', [OfficesController::class, 'edit']);
 Route::post('/update-office', [OfficesController::class, 'update']);
+
+Route::get('/reservations', [ReservationsController::class,'show'])->name('get-reservations');

@@ -74,9 +74,6 @@
         </tbody>
     </table>
 </div>
-<?php $test = fake()->lexify('PGO-???');
-echo strtoupper($test);
-?>
 
 </body>
 
