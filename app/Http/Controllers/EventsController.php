@@ -36,14 +36,41 @@ class EventsController extends Controller
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('action', function ($data) {
-                    $button = '<button type="button" name="edit" id="' . $data->off_id . '" class="edit btn btn-primary btn-sm">Edit</button>';
-                    $button .= '<button type="button" name="delete" id="' . $data->off_id . '" class="delete btn btn-danger btn-sm">Delete</button>';
+                    $button = '<button type="button" name="edit" id="'.$data->event_id.'" class="edit btn btn-primary btn-sm">Edit</button>';
+                    $button .= '<button type="button" name="delete" id="' . $data->event_id . '" class="delete btn btn-danger btn-sm">Delete</button>';
                     return $button;
                 })
                 ->rawColumns(['action'])
                 ->make(true);
         }
         return view('events');
-
+}
+public function edit($event_id)
+{
+    if (request()->ajax()) {
+        $data = Events::findOrFail($event_id);
+        return response()->json(['result' => $data]);
+    }
+}
+public function update(Request $request)
+{ 
+    $ev_name = $request->ev_name_modal;
+    $ev_venue = $request->ev_venue_modal;
+    $ev_date_start = $request->ev_date_start_modal;
+    $ev_time_start=$request->ev_time_start_modal;
+    $ev_date_end=$request->ev_date_end_modal;
+    $ev_time_end=$request->ev_time_end_modal;
+    $id = $request->hidden_id;
+    Events::where('event_id', $id)
+    ->update([
+        'ev_name' => $ev_name,
+        'ev_venue'=>$ev_venue,
+        'ev_date_start'=>$ev_date_start,
+        'ev_time_start' => $ev_time_start,
+        'ev_date_end'=>$ev_date_end,
+        'ev_time_end'=>$ev_time_end,
+    ]); 
+    return response()->json(['success' => 'Data is successfully updated']);
+    
 }
 }
