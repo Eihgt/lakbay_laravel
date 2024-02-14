@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Models\Drivers;
 use App\Models\Offices;
 use Illuminate\Http\Request;
@@ -25,19 +26,46 @@ class OfficesController extends Controller
         return view('offices');
 
     }
+    // public function fetch(){
+    //     $data = Offices::onlyTrashed()->get();
+    //     foreach($data as $data){
+    //         echo $data->off_name;
+    //     }
+    // }
+    public function store(Request $request)
+    { 
+        $offices  = new Offices();
 
-    public function destroy($off_id)
-    {
-            $data = Offices::findOrFail($off_id);
-            $data->delete();
+        $acr = $request->off_acr;
+        $name = $request->off_name;
+        $head = $request->off_head;
+
+        $offices->off_acr =$acr;
+        $offices->off_name = $name;
+        $offices->off_head = $head;
+
+        $offices->save();
+        return response()->json(['success' => 'Office successfully stored']);
         
     }
+    public function delete($off_id){
+        $data = Offices::findOrFail($off_id);
+        $data->delete();
+    }
+  
     public function edit($off_id)
     {
         if (request()->ajax()) {
             $data = Offices::findOrFail($off_id);
             return response()->json(['result' => $data]);
         }
+    }
+    public function restore($id) 
+    {
+        Offices::where('off_id', $id)->withTrashed()->restore();
+
+        return redirect()->route('offices.show', ['status' => 'archived'])
+            ->withSuccess(__('Record restored successfully.'));
     }
     public function update(Request $request)
     { 
@@ -54,5 +82,6 @@ class OfficesController extends Controller
         return response()->json(['success' => 'Data is successfully updated']);
         
     }
+    
 
 }

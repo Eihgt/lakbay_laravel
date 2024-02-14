@@ -27,7 +27,7 @@ class EventsController extends Controller
             $events->ev_date_added=$ev_date_added;
 
         $events->save();
-        return response()->json(['success' => 'Data is successfully updated']);
+        return response()->json(['success' => 'Event successfully recorded']);
     }
     public function show(Request $request)
     {
@@ -70,7 +70,12 @@ public function update(Request $request)
         'ev_date_end'=>$ev_date_end,
         'ev_time_end'=>$ev_time_end,
     ]); 
-    return response()->json(['success' => 'Data is successfully updated']);
+    return response()->json(['success' => 'Event successfully updated']);
     
+}
+public function delete($event_id){
+    $data = Events::findOrFail($event_id);
+    $data->delete();
+    return response()->json(['success' => 'Event successfully Deleted']);
 }
 }

@@ -36,7 +36,7 @@ class DriversController extends Controller
         $drivers->dr_status = $request->dr_status;
         $drivers->save();
 
-        return redirect('/driver');
+        return response()->json(['success' => 'Driver successfully Stored']);
     }
 
     /**
@@ -63,24 +63,39 @@ class DriversController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Drivers $drivers)
+    public function edit($driver_id)
     {
-        //
+        if (request()->ajax()) {
+            $data = Drivers::findOrFail($driver_id);
+            return response()->json(['result' => $data]);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Drivers $drivers)
+    public function update(Request $request)
     {
-        //
+        $dr_emp_id = $request->dr_emp_id_modal;
+        $dr_name = $request->dr_name_modal;
+        $dr_status = $request->dr_status_modal;
+        $dr_office=$request->dr_office_modal;
+        $id = $request->hidden_id;
+        Drivers::where('driver_id', $id)
+        ->update([
+            'dr_emp_id' => $dr_emp_id,
+            'dr_name'=>$dr_name,
+            'dr_status'=>$dr_status,
+            'dr_office' => $dr_office,
+        ]); 
+        return response()->json(['success' => 'Driver successfully updated']);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Drivers $drivers)
-    {
-        //
+    public function delete($driver_id){
+        $data = Drivers::findOrFail($driver_id);
+        $data->delete();
     }
 }

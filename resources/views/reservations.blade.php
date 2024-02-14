@@ -8,7 +8,7 @@
     <?php
     $title_page = 'LAKBAY Reservation System';
 ?>
- @include('includes.header');
+ @include('includes.header')
 </head>
 <body>
     <div class="row">
@@ -167,7 +167,7 @@
                         <td>ID</td>
                         <td>Event</td>
                         <td>Driver</td>
-                        <td>Vehicle</td>
+                        {{-- <td>Vehicle</td>
                         <td>Requestor</td>
                         <td>Voucher</td>
                         <td>DT</td>
@@ -175,7 +175,7 @@
                         <td>Filing</td>
                         <td>Approval</td>
                         <td>Status</td>
-                        <td>Actions</td>
+                        <td>Actions</td> --}}
                     </tr>
                 </thead>
                 <tbody>
@@ -201,15 +201,15 @@
                        {data: 'checkbox', name:'checkbox'},
                        {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false,  searchable: false },
                        {data: 'reservation_id', name:'reservation_id'},
-                       {data: 'rs_voucher', name:'rs_voucher'},
-                       {data: 'rs_daily_transport', name:'rs_daily_transport'},
-                       {data: 'rs_outside_province', name:'rs_outside_province'},
-                       {data: 'rs_date_filed', name:'rs_date_filed'},
-                       {data: 'rs_approval_status', name:'rs_approval_status'},
-                       {data: 'rs_status', name:'rs_status'},
+                    //    {data: 'rs_voucher', name:'rs_voucher'},
+                    //    {data: 'rs_daily_transport', name:'rs_daily_transport'},
+                    //    {data: 'rs_outside_province', name:'rs_outside_province'},
+                    //    {data: 'rs_date_filed', name:'rs_date_filed'},
+                    //    {data: 'rs_approval_status', name:'rs_approval_status'},
+                    //    {data: 'rs_status', name:'rs_status'},
                        {data: 'event_id', name:'event_id'},
                        {data: 'driver_id', name:'driver_id'},
-                       {data: 'vehicle_id', name:'vehicle_id'},
+                    //    {data: 'vehicle_id', name:'vehicle_id'},
                        {data: 'requestor_id', name:'requestor_id'},
                        {data: 'action', name: 'action',orderable: false,searchable: false},
                    ];
@@ -228,76 +228,76 @@
                        stateSave: true,
                        pageLength:15,
                        "lengthMenu": [ [10, 15, 25, 50, -1], [10, 15, 25, 50, "All"] ],
-                       buttons: [
-                           {
-                               text: "<i></i> Select all",
-                               className: "btn btn-primary btn-sm btn-select-all",
-                               action: function(e, dt, node, config) {
-                                   selectAllCheckBoxes();
-                               }
-                           },
-              
-                           {
-                               text: "<i></i> Deselect all",
-                               className: "btn btn-info btn-sm",
-                               action: function(e, dt, node, config) {
-                                   deselectAllCheckBoxes();
-                               }
-                           },
-              
-                           $.extend(
-                               true,
-                               {},
+                           buttons: [
                                {
-                                   extend: "excelHtml5",
-                                   text: '<i class="fa fa-download "></i> Excel',
-                                   className: "btn btn-default btn-sm",
-                                   title: title,
-                                   exportOptions: {
-                                       columns: columnArray
+                                   text: "<i></i> Select all",
+                                   className: "btn btn-primary btn-sm btn-select-all",
+                                   action: function(e, dt, node, config) {
+                                       selectAllCheckBoxes();
                                    }
-                               }
-                           ),
-              
-                           $.extend(
-                               true,
-                               {},
+                               },
+                
                                {
-                                   extend: "pdfHtml5",
-                                   text: '<i class="fa fa-download"></i> Pdf',
-                                   className: "btn btn-default btn-sm",
-                                   title: title,
-                                   exportOptions: {
-                                       columns: columnArray
+                                   text: "<i></i> Deselect all",
+                                   className: "btn btn-info btn-sm",
+                                   action: function(e, dt, node, config) {
+                                       deselectAllCheckBoxes();
                                    }
-                               }
-                           ),
-              
-                           $.extend(
-                               true,
-                               {},
-                               {
-                                   extend: "print",
-                                   exportOptions: {
-                                       columns: columnArray,
-                                       modifier: {
-                                           selected: null
+                               },
+                
+                               $.extend(
+                                   true,
+                                   {},
+                                   {
+                                       extend: "excelHtml5",
+                                       text: '<i class="fa fa-download "></i> Excel',
+                                       className: "btn btn-default btn-sm",
+                                       title: title,
+                                       exportOptions: {
+                                           columns: columnArray
                                        }
-                                   },
-                                   text: '<i class="fa fa-save"></i> Print',
-                                   className: "btn btn-default btn-sm",
-                                   title: title
+                                   }
+                               ),
+                
+                               $.extend(
+                                   true,
+                                   {},
+                                   {
+                                       extend: "pdfHtml5",
+                                       text: '<i class="fa fa-download"></i> Pdf',
+                                       className: "btn btn-default btn-sm",
+                                       title: title,
+                                       exportOptions: {
+                                           columns: columnArray
+                                       }
+                                   }
+                               ),
+                
+                               $.extend(
+                                   true,
+                                   {},
+                                   {
+                                       extend: "print",
+                                       exportOptions: {
+                                           columns: columnArray,
+                                           modifier: {
+                                               selected: null
+                                           }
+                                       },
+                                       text: '<i class="fa fa-save"></i> Print',
+                                       className: "btn btn-default btn-sm",
+                                       title: title
+                                   }
+                               ),
+                
+                               {
+                                   text: "<i></i> Delete selected",
+                                   className: "btn btn-danger btn-sm btn-deselect-all",
+                                   action: function(e, dt, node, config) {
+                                       deleteSelectedRows(table);
+                                   }
                                }
-                           ),
-              
-                           {
-                               text: "<i></i> Delete selected",
-                               className: "btn btn-danger btn-sm btn-deselect-all",
-                               action: function(e, dt, node, config) {
-                                   deleteSelectedRows(table);
-                               }
-                           }
-                       ],
+                           ],
                        ajax: ajaxUrl,
                        columns: dataColumns,
                        order: [[0, "asc"]]

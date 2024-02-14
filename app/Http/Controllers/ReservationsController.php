@@ -9,7 +9,5 @@ class ReservationsController extends Controller
     public function index(){
         return view('reservations');
     }
-    public function show(ReservationsDataTable $dataTable){
-        return $dataTable->render('reservations');
- }
+
 }
