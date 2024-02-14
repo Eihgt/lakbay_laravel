@@ -54,6 +54,7 @@ Route::get('/drivers', [DriversController::class, 'show'])->name('drivers.show')
 Route::post('/insertEvent', [EventsController::class, 'store']);
 Route::get('/events',[EventsController::class,'show'])->name('events.show');
 
+
 Route::get('/offices', [OfficesController::class, 'show'])->name('offices.show');
 Route::get('/delete-office/{off_id}', [OfficesController::class, 'destroy']);
 Route::get('/edit-office/{off_id}', [OfficesController::class, 'edit']);
