@@ -1,8 +1,12 @@
 <?php
     $title_page = 'LAKBAY Reservation System';
 ?>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<link  href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+{{-- <link  href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet"> --}}
 <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
   @include('includes.header');
     <div class="row">
@@ -12,29 +16,15 @@
     </div>
     <div class="row mb-3">
         <div class="col">
-            <form action="{{url('/insertRequestors')}}" method="POST" class="">
+            <form action="{{url('/store-requestor')}}" method="POST" class="">
                 <div class="card rounded-0">
                     <div class="card-header fs-6 bg-transparent text-dark rounded-0 pt-2 text-uppercase">
                         Input/Filter Form
                     </div>
                     <div class="card-body">
-                        <input type="hidden" name="requestor_id" value="<?php if(isset($edit_data)) echo $edit_data['requestor_id']; ?>">
                         <div class="row">
-                            <div class="col">
-                                <div class="mb-2">
-                                    <label for="rq_full_name" class="form-label mb-0">Full Name</label>
-                                    <input type="text" class="form-control rounded-1" name="rq_full_name" placeholder="Enter requestor name" value="<?php if(isset($edit_data)) echo $edit_data['rq_full_name']; ?>">
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="mb-2">
-                                    <label for="rq_office" class="form-label mb-0">Office</label>
-                                    <input type="text" class="form-control rounded-1" name="rq_office" placeholder="Enter requestor's offce" value="<?php if(isset($edit_data)) echo $edit_data['rq_office']; ?>">
-                                </div>
-                            </div>
-                            <div class="col"></div>
                             <div class="col btn-group">
-                                <button type="submit" name="submit" value="insert" class="btn btn-outline-primary h-50 mt-4 px-4 py-1 w-100 rounded-1">Submit</button>
+                                <a class="btn btn-success" onClick="add()" href="javascript:void(0)"> Add Requestor</a>
                             </div>
                         </div>
                     </div>
@@ -42,16 +32,7 @@
             </form>
         </div>
     </div>
-     @if ($message = Session::get('success'))
-        <div class="alert alert-success">
-            <p>{{ $message }}</p>
-        </div>
-    @endif
-
-    @error('name')
-        <div class="alert alert-danger mt-1 mb-1">{{ $message }}</div>
-    @enderror
-
+    
     <div class="row">
         <div class="col">
             <table class="table table-bordered table-hover" id="requestor_table">
@@ -66,6 +47,7 @@
             </table>
         </div>
     </div>
+    
      <!-- boostrap requestor model -->
 <div class="modal fade" id="requestor-modal" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -74,33 +56,25 @@
         <h4 class="modal-title" id="RequestorModal"></h4>
       </div>
       <div class="modal-body">
-
         {{-- Editable Form --}}
         <form action="javascript:void(0)" id="requestorForm" name="requestorForm" class="form-horizontal" method="POST" enctype="multipart/form-data">
           <input type="hidden" name="id" id="id">
           <div class="form-group">
-            <label for="name" class="col-sm-2 control-label">Company Name</label>
+            <label for="rq_full_name" class="col-sm-2 control-label">Full Name</label>
             <div class="col-sm-12">
-              <input type="text" class="form-control" id="name" name="name" placeholder="Enter Company Name" maxlength="50" required="">
+              <input type="text" class="form-control" id="rq_full_name" name="rq_full_name" placeholder="Enter Full Name" maxlength="50" required="">
             </div>
           </div> 
 
           <div class="form-group">
-            <label for="name" class="col-sm-2 control-label">Company Email</label>
+            <label for="rq_office" class="col-sm-2 control-label">Office</label>
             <div class="col-sm-12">
-              <input type="email" class="form-control" id="email" name="email" placeholder="Enter Company Email" maxlength="50" required="">
+              <input type="text" class="form-control" id="rq_office" name="rq_office" placeholder="Enter Office" maxlength="50" required="">
             </div>
-          </div>
-
-          <div class="form-group">
-            <label class="col-sm-2 control-label">Company Address</label>
-            <div class="col-sm-12">
-              <input type="text" class="form-control" id="address" name="address" placeholder="Enter Company Address" required="">
-            </div>
-          </div>
+          </div>       
 
           <div class="col-sm-offset-2 col-sm-10">
-            <button type="submit" class="btn btn-primary" id="btn-save">Save changes
+            <button type="submit" class="btn btn-primary" id="btn-save">Update
             </button>
           </div>
         </form>
@@ -137,35 +111,36 @@
        
       function add(){
            $('#requestorForm').trigger("reset");
-           $('#RequestorModal').html("Add Company");
+           $('#RequestorModal').html("Add Requestor");
            $('#requestor-modal').modal('show');
            $('#id').val(''); 
       }  
 
+
       function editFunc(id){
+        console.log(id);
         $.ajax({
             type:"POST",
             url: "{{ url('edit-requestor') }}",
-            data: { id: id },
+            data: { requestor_id: id },
             dataType: 'json',
             success: function(res){
-              $('#RequestorModal').html("Edit Company");
+              $('#RequestorModal').html("Edit Requestor");
               $('#requestor-modal').modal('show');
-              $('#requestor_id').val(res.requestor_id);
               $('#rq_full_name').val(res.rq_full_name);
-              $('#rq_office').val(res.rq_office);           }
+              $('#rq_office').val(res.rq_office);           
+            }
         });
       } 
      
       function deleteFunc(id){
             if (confirm("Delete Record?") == true) {
-            var id = id;
-              
+            var requestor_id = requestor_id;
               // ajax
               $.ajax({
                   type:"POST",
-                  url: "{{ url('delete-requestor') }}",
-                  data: { id: id },
+                  url: "{{ url('/delete-requestor') }}",
+                  data: { requestor_id: id },
                   dataType: 'json',
                   success: function(res){
      
@@ -190,7 +165,7 @@
               var oTable = $('#requestor_table').dataTable();
               oTable.fnDraw(false);
               $("#btn-save").html('Submit');
-              $("#btn-save"). attr("disabled", false);
+              $("#btn-save"). attr("disabled", false);  
             },
             error: function(data){
                console.log(data);

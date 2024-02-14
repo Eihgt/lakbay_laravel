@@ -34,6 +34,7 @@ class RequestorsController extends Controller
     public function create()
     {
         //
+        return view('requestor.requestors');
     }
 
     /**
@@ -41,10 +42,10 @@ class RequestorsController extends Controller
      */
     public function store(Request $request)
     {
-        $requestorId = $request->id;
+        $requestor_id = $request->requestor_id;
         $requestor  = Requestors::updateOrCreate(
             [
-                'id' => $requestorId
+                'requestor_id' => $requestor_id
             ],
             [
                 'rq_full_name' => $request->rq_full_name,
@@ -67,11 +68,11 @@ class RequestorsController extends Controller
     public function edit(Request $request)
     {
         //
-        $where = array('id' => $request->id);
+        $where = array('requestor_id' => $request->requestor_id);
         $requestor = Requestors::where($where)->first();
 
         return Response()->json($requestor);
-
+        
     }
 
     /**
@@ -88,10 +89,9 @@ class RequestorsController extends Controller
     public function destroy(Request $request)
     {
         //
-        $requestor = Requestors::where('id',$request->id)->delete();
+        $requestor = Requestors::where('requestor_id',$request->requestor_id)->delete();
 
         return Response()->json($requestor);
-
     }
     
 }

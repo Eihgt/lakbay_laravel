@@ -58,6 +58,7 @@ Route::get('/edit-event/{event_id}', [EventsController::class, 'edit']);
 Route::post('/update-event', [EventsController::class, 'update']);
 Route::get('/delete-event/{event_id}', [EventsController::class, 'delete']);
 
+
 Route::get('/offices', [OfficesController::class, 'show'])->name('offices.show');
 Route::post('/insert-office', [OfficesController::class, 'store']);
 Route::get('/delete-office/{off_id}', [OfficesController::class, 'delete']);

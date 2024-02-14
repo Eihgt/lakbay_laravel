@@ -19,7 +19,7 @@ class RequestorsFactory extends Factory
         return [
             // 'requestors_id' => fake()->randomNumber(),
             'rq_full_name' => fake()->name(),
-            'rq_office' => fake()->name(),
+            'rq_office' => fake()->company(),
         ];
     }
 }
