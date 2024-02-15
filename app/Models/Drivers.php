@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Offices;
 class Drivers extends Model
 {
     use HasFactory;
@@ -14,7 +16,12 @@ class Drivers extends Model
         'driver_id',
         'dr_emp_id',
         'dr_name',
-        'dr_office',
+        'off_id',
         'dr_status',
     ];
+    public function offices(): BelongsTo
+    {
+        return $this->belongsTo(Offices::class, 'off_id');
+    }
+
 }

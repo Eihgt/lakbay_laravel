@@ -20,7 +20,7 @@ class DriversFactory extends Factory
             // "driver_id" => fake()->unique()->randomNumber(4, true),
             "dr_emp_id" => fake()->unique()->randomNumber(8, true),
             "dr_name" => fake()->name(),
-            "dr_office" => fake()->company(),
+            "off_id" => fake()->numberBetween(1,10),
             "dr_status" => fake()->randomElement(['On Travel', 'Busy','Idle']),
         ];
     }

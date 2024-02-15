@@ -5,6 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Drivers;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\Writer\Word2007;
+use PhpOffice\PhpWord\Shared\XMLWriter; 
+use PhpOffice\PhpWord\Shared\ZipArchive;
+use PhpOffice\PhpWord\TemplateProcessor;    
+use Illuminate\Support\Facades\DB;
 
 class DriversController extends Controller
 {
@@ -97,5 +103,26 @@ class DriversController extends Controller
     public function delete($driver_id){
         $data = Drivers::findOrFail($driver_id);
         $data->delete();
+    }
+    public function test_store(Request $request)
+    {
+        $rows = Drivers::count();
+        $drivers = DB::table('drivers')->select('driver_id','dr_name','off_name','dr_status')->join('offices','drivers.off_id','offices.off_id')->get();
+        // dd($drivers);
+        $templateProcessor = new TemplateProcessor(public_path().'\\'."sample.docx");
+        $templateProcessor->cloneRow('driver_id', $rows);
+
+        for($i=0;$i<$rows;$i++){
+            $driver=$drivers[$i];
+            $templateProcessor->setValue("driver_id#".($i+1),$driver->driver_id);
+            $templateProcessor->setValue("dr_name#".($i+1),$driver->dr_name);
+            $templateProcessor->setValue("dr_office#".($i+1),$driver->off_name);
+            $templateProcessor->setValue("dr_status#".($i+1),$driver->dr_status);
+        }
+        $templateProcessor->saveAs(public_path().'\\'."WordDownloads\sample_downloads.docx");
+        return response()->download(public_path().'\\'."WordDownloads\sample_downloads.docx", "sample.docx")->deleteFileAfterSend(true);
+        
+        
+        
     }
 }
