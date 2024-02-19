@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Datatables\ReservationsDataTable;
 class ReservationsController extends Controller
 {
-    public function index(){
+    public function show(){
         return view('reservations');
     }
 
