@@ -48,6 +48,28 @@
         </div>
     </div>
     
+  <!--- DELETE MODAL --->
+  <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <form method="post" id="office_form" class="form-horizontal">
+                  <div class="modal-header">
+                      <h5 class="modal-title" id="ModalLabel">Confirmation</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                      <h4 align="center" style="margin:0;">Are you sure you want to remove this data?</h4>
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      <button type="button" name="ok_button" id="ok_button" class="btn btn-danger">OK</button>
+                  </div>
+              </form>
+          </div>
+      </div>
+  </div>
+  <!--- DELETE MODAL --->
+
      <!-- boostrap requestor model -->
 <div class="modal fade" id="requestor-modal" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -95,19 +117,66 @@
         }
       });
         $('#requestor_table').DataTable({
+          
                processing: true,
                serverSide: true,
+               dom: 'Bfrtip',
                ajax: "{{ url('requestors') }}",
+               search: {
+               return: true
+               },
                columns: [
                         { data: 'requestor_id', name: 'requestor_id' },
                         { data: 'rq_full_name', name: 'rq_full_name' },
                         { data: 'rq_office', name: 'rq_office' },
-                        {data: 'action', name: 'action', orderable: false},
+                        {data: 'action', name: 'action', orderable: false,
+                        searchable: false},
+
                      ],
-                     order: [[0, 'desc']]
-           });
-     
+                     order: [[0, 'desc']],
+               buttons: [
+        {
+            extend: 'excel',
+            exportOptions: {
+                columns: ':visible'
+            }
+        },
+        {
+            extend: 'print',
+            exportOptions: {
+                columns: ':visible'
+            }
+        },
+        {
+            extend: 'pdf',
+            exportOptions: {
+                columns: ':visible'
+            }
+        },
+        {
+            extend: 'copy',
+            exportOptions: {
+                columns: ':visible'
+            }
+        },
+        {
+            extend: 'csv',
+            exportOptions: {
+                columns: ':visible'
+            }
+        },
+        'colvis'
+    ],
+    columnDefs: [
+        {
+            targets: 0,
+            visible: true
+        }
+    ],
+           });  
       });
+
+
        
       function add(){
            $('#requestorForm').trigger("reset");
@@ -133,23 +202,25 @@
         });
       } 
      
-      function deleteFunc(id){
-            if (confirm("Delete Record?") == true) {
-            var requestor_id = requestor_id;
-              // ajax
-              $.ajax({
-                  type:"POST",
-                  url: "{{ url('/delete-requestor') }}",
-                  data: { requestor_id: id },
-                  dataType: 'json',
-                  success: function(res){
+  function deleteFunc(id) {
+    $('#confirmModal').modal('show');
+
+    $('#ok_button').click(function () {
+        $.ajax({
+            type: "POST",
+            url: "{{ url('/delete-requestor') }}",
+            data: { requestor_id: id },
+            dataType: 'json',
+            success: function (res) {
+                var oTable = $('#requestor_table').dataTable();
+                oTable.fnDraw(false);
+                $('#confirmModal').modal('hide');
+            }
+        });
+    });
+    +
+}
      
-                    var oTable = $('#requestor_table').dataTable();
-                    oTable.fnDraw(false);
-                 }
-              });
-           }
-      }
       $('#requestorForm').submit(function(e) {     
          e.preventDefault();       
          var formData = new FormData(this);       
