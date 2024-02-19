@@ -218,7 +218,6 @@
             }
         });
     });
-    +
 }
      
       $('#requestorForm').submit(function(e) {     
