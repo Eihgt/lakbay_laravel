@@ -36,12 +36,15 @@
                                     <input type="text" class="form-control rounded-1" name="dr_name" placeholder="Enter driver's full name" value="">
                                 </div>
                             </div>
-                            <div class="col">
-                                <div class="mb-2">
-                                    <label for="dr_office" class="form-label mb-0">Office</label>
-                                    <input type="text" class="form-control rounded-1" name="dr_office" placeholder="Enter driver's office" value="">
-                                </div>
+                            <div class="form-group">
+                                <label>Office</label>
+                                <select name="dr_office" id="dr_office" class="form-control">
+                                    @foreach ($offices as $office)
+                                        <option value="{{ $office->off_id }}">{{ $office->off_acr }}</option>
+                                    @endforeach 
+                                </select>
                             </div>
+                            
                             <div class="col">
                                 <div class="mb-2">   
                                         <label for="dr_status">Status</label>
@@ -117,11 +120,15 @@
                         <label>Name : </label>
                         <input type="text" name="dr_name_modal" id="dr_name_modal" class="form-control" />
                     </div>
-                    <div class="form-group editpass">
+                    <div class="form-group">
                         <label>Office</label>
-                        <input type="text" name="dr_office_modal" id="dr_office_modal" class="form-control" />
+                        <select name="dr_office_modal" id="dr_office_modal" class="form-control">
+                            @foreach ($offices as $office)
+                                <option value="{{ $office->off_id }}">{{ $office->off_acr }}</option>
+                            @endforeach 
+                        </select>
                     </div>
-                    <div class="form-group editpass">
+                    <div class="form-group">
                         <label for="status">Status</label>
                         <select name="dr_status_modal" id="dr_status_modal">
                             <option value="Idle">Idle</option>
@@ -147,59 +154,73 @@
 <script type="text/javascript">
     $(document).ready(function() {
     var table = $('#driver-table').DataTable({
-        search: {
+    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+    search: {
         return: true
     },
     processing: true,
     serverSide: true,
-    dom: 'Bfrtip',
+    dom: 'Blfrtip',
     buttons: [
         {
-            extend: 'excel',
-            exportOptions: {
-                columns: ':visible'
-            }
+        text: 'Word',
+        action: function ( e, dt, node, config ) {
+        window.location.href='/driver-word';
+                }
         },
         {
-            extend: 'print',
-            exportOptions: {
-                columns: ':visible'
-            }
-        },
-        {
-            extend: 'pdf',
-            exportOptions: {
-                columns: ':visible'
-            }
-        },
-        {
-            extend: 'copy',
-            exportOptions: {
-                columns: ':visible'
-            }
-        },
-        {
-            extend: 'csv',
-            exportOptions: {
-                columns: ':visible'
-            }
-        },
-        'colvis'
-    ],
-    columnDefs: [
-        {
-            targets: 0,
-            visible: true
+        text: 'Excel',
+        action: function ( e, dt, node, config ) {
+        window.location.href='/driver-excel';
+                }
         }
+    //     {
+    //         extend: 'excel',
+    //         exportOptions: {
+    //             columns: ':visible'
+    //         }
+    //     },
+    //     {
+    //         extend: 'print',
+    //         exportOptions: {
+    //             columns: ':visible'
+    //         }
+    //     },
+    //     {
+    //         extend: 'pdf',
+    //         exportOptions: {
+    //             columns: ':visible'
+    //         }
+    //     },
+    //     {
+    //         extend: 'copy',
+    //         exportOptions: {
+    //             columns: ':visible'
+    //         }
+    //     },
+    //     {
+    //         extend: 'csv',
+    //         exportOptions: {
+    //             columns: ':visible'
+    //         }
+    //     },
+    //     'colvis'
+    // ],
+    // columnDefs: [
+    //     {
+    //         targets: 0,
+    //         visible: true
+    //     }
     ],
     ajax: "{{ route('drivers.show') }}",
     columns: [
-        {data: 'dr_emp_id', name: 'dr_emp_id'},
-        {data: 'dr_name', name: 'dr_name'},
-        {data: 'dr_office', name: 'dr_office'},
-        {data: 'dr_status', name: 'dr_status'},
-        {data: 'action', name: 'action', orderable: false, searchable: false},
-    ]
+    {data: 'dr_emp_id', name: 'dr_emp_id'},
+    {data: 'dr_name', name: 'dr_name'},
+    {data: 'off_name', name: 'offices.off_name'},
+    {data: 'dr_status', name: 'dr_status'},
+    {data: 'action', name: 'action', orderable: false, searchable: false},
+]
+
 });
  // STORE---------------------------//
         $('#insert_form').on('submit', function(event) {
@@ -253,7 +274,7 @@
              {
              $('#dr_emp_id_modal').val(data.result.dr_emp_id);
              $('#dr_name_modal').val(data.result.dr_name);
-             $('#dr_office_modal').val(data.result.dr_office);
+             $('#dr_office_modal').val(data.result.off_name);
              $('#dr_status_modal').val(data.result.dr_status);
              $('#hidden_id').val(driver_id);
              $('.modal-title').text('Edit Record');
@@ -296,7 +317,7 @@
                                 html = "<div class='alert alert-info alert-dismissible fade show py-1 px-4 d-flex justify-content-between align-items-center' role='alert'><span>&#8505; &nbsp;" + data.success + "</span><button type='button' class='btn fs-4 py-0 px-0' data-bs-dismiss='alert' aria-label='Close'>&times;</button></div>";
                                 $('#driver-table').DataTable().ajax.reload();
                                 $('#formModal').modal('hide');
-                                $('#events_form')[0].reset();
+                                $('#driver_modal')[0].reset();
                                 
 
                             }

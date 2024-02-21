@@ -73,6 +73,24 @@ public function update(Request $request)
     return response()->json(['success' => 'Event successfully updated']);
     
 }
+public function events_word(Request $request){
+
+    $rows = Events::count();
+    $events = DB::table('events')->select('off_id','off_acr','off_name','off_head')->get();
+    // dd($offices);
+    $templateProcessor = new TemplateProcessor(public_path().'\\'."Offices.docx");
+
+    $templateProcessor->cloneRow('off_id', $rows);
+    for($i=0;$i<$rows;$i++){
+        $office=$offices[$i];
+        $templateProcessor->setValue("off_id#".($i+1),$office->off_id);
+        $templateProcessor->setValue("off_acr#".($i+1),$office->off_acr);
+        $templateProcessor->setValue("off_name#".($i+1),$office->off_name);
+        $templateProcessor->setValue("off_head#".($i+1),$office->off_head);
+    }
+    $templateProcessor->saveAs(public_path().'\\'."WordDownloads\sample_downloads.docx");
+    return response()->download(public_path().'\\'."WordDownloads\sample_downloads.docx", "OfficesList.docx")->deleteFileAfterSend(true);
+}
 public function delete($event_id){
     $data = Events::findOrFail($event_id);
     $data->delete();

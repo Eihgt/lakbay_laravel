@@ -7,7 +7,12 @@ use App\Models\Drivers;
 use App\Models\Offices;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
-
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\Writer\Word2007;
+use PhpOffice\PhpWord\Shared\XMLWriter; 
+use PhpOffice\PhpWord\Shared\ZipArchive;
+use PhpOffice\PhpWord\TemplateProcessor;    
+use Illuminate\Support\Facades\DB;
 class OfficesController extends Controller
 {
     public function show(Request $request){
@@ -81,6 +86,24 @@ class OfficesController extends Controller
         ]); 
         return response()->json(['success' => 'Data is successfully updated']);
         
+    }
+    public function offices_word(Request $request){
+
+        $rows = Offices::count();
+        $offices = DB::table('offices')->select('off_id','off_acr','off_name','off_head')->get();
+        // dd($offices);
+        $templateProcessor = new TemplateProcessor(public_path().'\\'."Offices.docx");
+
+        $templateProcessor->cloneRow('off_id', $rows);
+        for($i=0;$i<$rows;$i++){
+            $office=$offices[$i];
+            $templateProcessor->setValue("off_id#".($i+1),$office->off_id);
+            $templateProcessor->setValue("off_acr#".($i+1),$office->off_acr);
+            $templateProcessor->setValue("off_name#".($i+1),$office->off_name);
+            $templateProcessor->setValue("off_head#".($i+1),$office->off_head);
+        }
+        $templateProcessor->saveAs(public_path().'\\'."WordDownloads\sample_downloads.docx");
+        return response()->download(public_path().'\\'."WordDownloads\sample_downloads.docx", "OfficesList.docx")->deleteFileAfterSend(true);
     }
     
 

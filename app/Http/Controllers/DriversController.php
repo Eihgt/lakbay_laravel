@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Drivers;
+use App\Models\Offices;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 use PhpOffice\PhpWord\PhpWord;
@@ -35,13 +36,15 @@ class DriversController extends Controller
      */
     public function store(Request $request)
     {
+        
         $drivers = new Drivers();
         $drivers->dr_emp_id=$request->dr_emp_id;
         $drivers->dr_name = $request->dr_name ;
-        $drivers->dr_office = $request->dr_office;
+        $drivers->off_id = $request->dr_office;
         $drivers->dr_status = $request->dr_status;
-        $drivers->save();
 
+        
+        $drivers->save();
         return response()->json(['success' => 'Driver successfully Stored']);
     }
 
@@ -51,7 +54,10 @@ class DriversController extends Controller
     public function show(Request $request)
     {
         if ($request->ajax()) {
-            $data = Drivers::select('*');
+            $data = Drivers::select('drivers.*', 'offices.off_name')
+                ->leftJoin('offices', 'drivers.off_id', '=', 'offices.off_id')
+                ->get();
+            
             return Datatables::of($data)
                 ->addIndexColumn()
                 ->addColumn('action', function ($data) {
@@ -62,9 +68,12 @@ class DriversController extends Controller
                 ->rawColumns(['action'])
                 ->make(true);
         }
-
-        return view('drivers');
+        $offices = DB::table('offices')->select('off_id','off_acr')->get();
+        return view('drivers')->with(compact('offices'));
     }
+    
+    
+    
 
     /**
      * Show the form for editing the specified resource.
@@ -72,30 +81,34 @@ class DriversController extends Controller
     public function edit($driver_id)
     {
         if (request()->ajax()) {
-            $data = Drivers::findOrFail($driver_id);
+            $data = Drivers::select('drivers.*', 'offices.off_name')
+                ->leftJoin('offices', 'drivers.off_id', '=', 'offices.off_id')
+                ->findOrFail($driver_id);
             return response()->json(['result' => $data]);
         }
     }
+    
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request)
     {
-        $dr_emp_id = $request->dr_emp_id_modal;
-        $dr_name = $request->dr_name_modal;
-        $dr_status = $request->dr_status_modal;
-        $dr_office=$request->dr_office_modal;
         $id = $request->hidden_id;
-        Drivers::where('driver_id', $id)
-        ->update([
-            'dr_emp_id' => $dr_emp_id,
-            'dr_name'=>$dr_name,
-            'dr_status'=>$dr_status,
-            'dr_office' => $dr_office,
-        ]); 
+        
+        $driver = Drivers::findOrFail($id);
+        $off_id=$driver->off_id;
+        $driver->dr_emp_id = $request->dr_emp_id_modal;
+        $driver->dr_name = $request->dr_name_modal;
+        $driver->dr_status = $request->dr_status_modal;
+        $driver->off_id = $request->dr_office_modal;
+        $driver->save();
+
+    
         return response()->json(['success' => 'Driver successfully updated']);
     }
+    
+    
 
     /**
      * Remove the specified resource from storage.
@@ -104,25 +117,41 @@ class DriversController extends Controller
         $data = Drivers::findOrFail($driver_id);
         $data->delete();
     }
-    public function test_store(Request $request)
+    public function driver_word(Request $request)
     {
         $rows = Drivers::count();
-        $drivers = DB::table('drivers')->select('driver_id','dr_name','off_name','dr_status')->join('offices','drivers.off_id','offices.off_id')->get();
+        $drivers = DB::table('drivers')->select('driver_id','dr_emp_id','dr_name','off_name')->join('offices','drivers.off_id','offices.off_id')->get();
         // dd($drivers);
-        $templateProcessor = new TemplateProcessor(public_path().'\\'."sample.docx");
+        $templateProcessor = new TemplateProcessor(public_path().'\\'."Offices.docx");
+
+        $templateProcessor->cloneRow('driver_id', $rows);
+        for($i=0;$i<$rows;$i++){
+            $driver=$drivers[$i];
+            $templateProcessor->setValue("driver_id#".($i+1),$driver->driver_id);
+            $templateProcessor->setValue("dr_emp_id#".($i+1),$driver->dr_emp_id);
+            $templateProcessor->setValue("dr_name#".($i+1),$driver->dr_name);
+            $templateProcessor->setValue("dr_office#".($i+1),$driver->off_name);
+        }
+        $templateProcessor->saveAs(public_path().'\\'."WordDownloads\sample_downloads.docx");
+        // return response()->download(public_path().'\\'."WordDownloads\sample_downloads.docx", "DriverList.docx")->deleteFileAfterSend(true);
+    }
+    public function driver_excel(Request $request)
+    {
+        $rows = Drivers::count();
+        $drivers = DB::table('drivers')->select('driver_id','dr_emp_id','dr_name','off_name')->join('offices','drivers.off_id','offices.off_id')->get();
+        // dd($drivers);
+        $templateProcessor = new TemplateProcessor(public_path().'\\'."Drivers.xlsx");
         $templateProcessor->cloneRow('driver_id', $rows);
 
         for($i=0;$i<$rows;$i++){
             $driver=$drivers[$i];
             $templateProcessor->setValue("driver_id#".($i+1),$driver->driver_id);
+            $templateProcessor->setValue("dr_emp_id#".($i+1),$driver->dr_emp_id);
             $templateProcessor->setValue("dr_name#".($i+1),$driver->dr_name);
             $templateProcessor->setValue("dr_office#".($i+1),$driver->off_name);
-            $templateProcessor->setValue("dr_status#".($i+1),$driver->dr_status);
         }
-        $templateProcessor->saveAs(public_path().'\\'."WordDownloads\sample_downloads.docx");
-        return response()->download(public_path().'\\'."WordDownloads\sample_downloads.docx", "sample.docx")->deleteFileAfterSend(true);
         
-        
-        
+        $templateProcessor->saveAs(public_path().'\\'."ExcelDownloads\sample_downloads.xlsx");
+        return response()->download(public_path().'\\'."ExcelDownloads\sample_downloads.xlsx", "DriverList.xlsx")->deleteFileAfterSend(true);  
     }
 }

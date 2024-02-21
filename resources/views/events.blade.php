@@ -231,45 +231,52 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
-        var table = $('.events-table').DataTable({                                  
-    search: {
-        return: true
-    },
-    processing: true,
-    serverSide: true,
-    dom: 'Bfrtip',
-    buttons: [
-        {
-            extend: 'excel',
-            exportOptions: {
-                columns: ':visible'
-            }
+        var table = $('.events-table').DataTable({ 
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],                                 
+        search: {
+            return: true
         },
-        {
-            extend: 'print',
-            exportOptions: {
-                columns: ':visible'
-            }
-        },
-        {
-            extend: 'pdf',
-            exportOptions: {
-                columns: ':visible'
-            }
-        },
-        {
-            extend: 'copy',
-            exportOptions: {
-                columns: ':visible'
-            }
-        },
-        {
-            extend: 'csv',
-            exportOptions: {
-                columns: ':visible'
-            }
-        },
-        'colvis'
+        processing: true,
+        serverSide: true,
+        dom: 'Blfrtip',
+        buttons: [
+            {
+                text: 'Word',
+                action: function ( e, dt, node, config ) {
+                    window.location.href='/events-word';
+                }
+             },
+        // {
+        //     extend: 'excel',
+        //     exportOptions: {
+        //         columns: ':visible'
+        //     }
+        // },
+        // {
+        //     extend: 'print',
+        //     exportOptions: {
+        //         columns: ':visible'
+        //     }
+        // },
+        // {
+        //     extend: 'pdf',
+        //     exportOptions: {
+        //         columns: ':visible'
+        //     }
+        // },
+        // {
+        //     extend: 'copy',
+        //     exportOptions: {
+        //         columns: ':visible'
+        //     }
+        // },
+        // {
+        //     extend: 'csv',
+        //     exportOptions: {
+        //         columns: ':visible'
+        //     }
+        // },
+        // 'colvis'
     ],
     columnDefs: [
         {

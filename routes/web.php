@@ -51,6 +51,8 @@ Route::get('/drivers', [DriversController::class, 'show'])->name('drivers.show')
 Route::get('/delete-driver/{driver_id}', [DriversController::class, 'delete']);
 Route::get('/edit-driver/{driver_id}', [DriversController::class, 'edit']);
 Route::post('/update-driver', [DriversController::class, 'update']);
+Route::get('/driver-word', [DriversController::class, 'driver_word']);
+Route::get('/driver-excel', [DriversController::class, 'driver_excel']);
 //End
 //Event Section
 Route::post('/insert-event', [EventsController::class, 'store']);
@@ -58,6 +60,7 @@ Route::get('/events',[EventsController::class,'show'])->name('events.show');
 Route::get('/edit-event/{event_id}', [EventsController::class, 'edit']);
 Route::post('/update-event', [EventsController::class, 'update']);
 Route::get('/delete-event/{event_id}', [EventsController::class, 'delete']);
+Route::get('/events-word', [OfficesController::class, 'events_word']);
 //End
 //Offices Section
 Route::get('/offices', [OfficesController::class, 'show'])->name('offices.show');
@@ -65,10 +68,12 @@ Route::post('/insert-office', [OfficesController::class, 'store']);
 Route::get('/delete-office/{off_id}', [OfficesController::class, 'delete']);
 Route::get('/edit-office/{off_id}', [OfficesController::class, 'edit']);
 Route::post('/update-office', [OfficesController::class, 'update']);
+Route::get('/offices-word', [OfficesController::class, 'offices_word']);
 //End
 //Reservation Section
 Route::get('/reservations', [ReservationsController::class,'show'])->name('reservations.show');
+Route::post('/insert-reservations', [ReservationsController::class, 'store']);
 //End
 
 //Test Section
-Route::get('/test-test', [DriversController::class, 'test_store']);
+Route::get('/driver-word', [DriversController::class, 'driver_word']);

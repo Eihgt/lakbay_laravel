@@ -137,44 +137,51 @@
             }
         });
            var table = $('.office-table').DataTable({
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
             search: {
             return: true
             },
              processing: true
             , serverSide: true
-            ,dom: 'Bfrtip',
+            ,dom: 'Blfrtip',
             buttons: [
-        {
-            extend: 'excel',
-            exportOptions: {
-                columns: ':visible'
-            }
+                {   
+                text: 'Word',
+                action: function ( e, dt, node, config ) {
+                    window.location.href='/offices-word';
+                }
         },
-        {
-            extend: 'print',
-            exportOptions: {
-                columns: ':visible'
-            }
-        },
-        {
-            extend: 'pdf',
-            exportOptions: {
-                columns: ':visible'
-            }
-        },
-        {
-            extend: 'copy',
-            exportOptions: {
-                columns: ':visible'
-            }
-        },
-        {
-            extend: 'csv',
-            exportOptions: {
-                columns: ':visible'
-            }
-        },
-        'colvis'
+        // {
+        //     extend: 'excel',
+        //     exportOptions: {
+        //         columns: ':visible'
+        //     }
+        // },
+        // {
+        //     extend: 'print',
+        //     exportOptions: {
+        //         columns: ':visible'
+        //     }
+        // },
+        // {
+        //     extend: 'pdf',
+        //     exportOptions: {
+        //         columns: ':visible'
+        //     }
+        // },
+        // {
+        //     extend: 'copy',
+        //     exportOptions: {
+        //         columns: ':visible'
+        //     }
+        // },
+        // {
+        //     extend: 'csv',
+        //     exportOptions: {
+        //         columns: ':visible'
+        //     }
+        // },
+        // 'colvis'
     ]
             , ajax: "{{ route('offices.show') }}"
 
