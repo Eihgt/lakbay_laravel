@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DriversController;
 use App\Http\Controllers\OfficesController;
 use App\Http\Controllers\RequestorsController;
+use App\Http\Controllers\VehiclesController;
 use App\Http\Controllers\ReservationsController;
 use App\Http\Controllers\EventsController;
 use App\Http\Controllers\Controller;
@@ -29,12 +30,6 @@ Route::get('/test', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 });
-Route::get('/vehicles', function () {
-    return view('vehicles');
-});
-Route::get('/requestors', function () {
-    return view('requestors');
-});
 
 
 Route::get('/',[Controller::class,'redirect']);
@@ -54,6 +49,15 @@ Route::post('/update-driver', [DriversController::class, 'update']);
 Route::get('/driver-word', [DriversController::class, 'driver_word']);
 Route::get('/driver-excel', [DriversController::class, 'driver_excel']);
 //End
+//Vehicles Section
+// Route::post('/insert-driver',[DriversController::class,'store']);
+Route::get('/vehicles', [VehiclesController::class, 'show'])->name('vehicles.show');
+// Route::get('/delete-driver/{driver_id}', [DriversController::class, 'delete']);
+// Route::get('/edit-driver/{driver_id}', [DriversController::class, 'edit']);
+// Route::post('/update-driver', [DriversController::class, 'update']);
+// Route::get('/driver-word', [DriversController::class, 'driver_word']);
+// Route::get('/driver-excel', [DriversController::class, 'driver_excel']);
+//End
 //Event Section
 Route::post('/insert-event', [EventsController::class, 'store']);
 Route::get('/events',[EventsController::class,'show'])->name('events.show');
@@ -72,7 +76,12 @@ Route::get('/offices-word', [OfficesController::class, 'offices_word']);
 //End
 //Reservation Section
 Route::get('/reservations', [ReservationsController::class,'show'])->name('reservations.show');
-Route::post('/insert-reservations', [ReservationsController::class, 'store']);
+Route::get('/reservations-word', [ReservationsController::class, 'reservations_word']);
+Route::get('/reservations-excel', [ReservationsController::class, 'reservations_excel']);
+Route::post('/insert-reservation', [ReservationsController::class, 'store']);
+Route::post('/update-reservation', [ReservationsController::class, 'update']);
+Route::get('/edit-reservation/{reservation_id}', [ReservationsController::class, 'edit']);
+Route::get('/delete-reservation/{reservation_id}', [ReservationsController::class, 'delete']);
 //End
 
 //Test Section

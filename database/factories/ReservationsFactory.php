@@ -23,7 +23,9 @@ class ReservationsFactory extends Factory
         return [
             'rs_voucher' => fake()->randomNumber(),
             'rs_daily_transport' => fake()->boolean(),
-            'rs_outside_province' => fake()->boolean(),
+            'rs_outside_province' => function(array $attributes) {
+                return !$attributes['rs_daily_transport'];
+            },
             'rs_date_filed' => fake()->date(),
             'rs_approval_status' => fake()->randomElement(['Pending', 'Approved', 'Rejected']),
             'rs_status' => fake()->randomElement(['Active', 'Inactive','Cancelled']),
@@ -33,6 +35,7 @@ class ReservationsFactory extends Factory
             'requestor_id' => fake()->numberBetween(1,10), // Assuming requestor_id is a foreign key
             'created_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'updated_at' => fake()->dateTimeBetween('-1 year', 'now'),
+            
         ];
     }
 }

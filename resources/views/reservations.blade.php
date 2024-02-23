@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Reservations</title>
     <?php
-    $title_page = 'LAKBAY Reservation System';
+    $title_page = 'Reservations';
 ?>
  @include('includes.header')
 </head>
 <body>
     <div class="row">
         <div class="col">
-            <h4 class="text-uppercase">reservations</h4>
+            <h4 class="text-uppercase">Reservations</h4>
         </div>
     </div>
     <div class="row mb-3">
@@ -79,7 +79,7 @@
                             <div class="col-6">
                                 <div class="mb-2">
                                     <label for="rs_voucher" class="form-label mb-0">Voucher</label>
-                                    <input type="text" class="form-control rounded-1" name="rs_voucher" placeholder="Enter Voucher code" value="">
+                                    <input type="text" class="form-control rounded-1" name="rs_voucher"placeholder="Enter Voucher code" value="">
                                 </div>
                             </div>
                             <div class="col-3">
@@ -104,20 +104,14 @@
                             </div>
                         </div>
                         <div class="row">
-                                {{-- <div class="col-6">
-                                    <div class="mb-2">
-                                        <label for="rs_date_filed" class="form-label mb-0">Date of Filing</label>
-                                        <input type="date" class="form-control rounded-1" name="rs_date_filed" placeholder="Enter reservation's start time" value="">
-                                    </div>
-                                </div> --}}
                             <div class="col-3">
                                 <div class="mb-2">
                                     <label for="rs_approval_status" class="form-label mb-0">Approval Status</label>
                                     <select class="form-select" name="rs_approval_status">
                                         <option value="">Select Approval Status</option>
-                                        <option value="approved">Approved</option>
-                                        <option value="rejected">Rejected</option>
-                                        <option value="pending">Pending</option>
+                                        <option value="Approved">Approved</option>
+                                        <option value="Rejected">Rejected</option>
+                                        <option value="Pending">Pending</option>
                                     </select>
                                 </div>
                             </div>
@@ -126,9 +120,9 @@
                                     <label for="rs_status" class="form-label mb-0">Reservation Status</label>
                                     <select class="form-select" name="rs_status">
                                         <option value="">Select Status</option>
-                                        <option value="on-going" >On-going</option>
-                                        <option value="queued">Queued</option>
-                                        <option value="done">Done</option>
+                                        <option value="On-going" >On-going</option>
+                                        <option value="Queued">Queued</option>
+                                        <option value="Done">Done</option>
                                     </select>
                                 </div>
                             </div>
@@ -184,6 +178,108 @@
         </div>
     </div>
 </div>
+<!-------------EDIT MODAL --------------->
+<div class="modal fade" tabindex="-1" id="reservation_modal" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" id="reservation_edit" name="reservation_edit" class="form-horizontal">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalLabel">Edit Reservation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <div class="form-group">
+                        <label>Event : </label>
+                        <select class="form-select" name="event_edit" id="event_edit">
+                            @foreach ($events as $event)
+                            <option value="{{$event->event_id}}">{{ $event->ev_name }}</option>
+                            @endforeach
+                            
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Driver : </label>
+                        <select class="form-select" name="driver_edit" id="driver_edit">
+                            @foreach ($drivers as $driver)
+                            <option value="{{$driver->driver_id}}">{{ $driver->dr_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Vehicle</label>
+                        <select class="form-select" name="vehicle_edit" id="vehicle_edit">
+                            @foreach ($vehicles as $vehicle)
+                            <option value="{{ $vehicle->vehicle_id }}">{{ $vehicle->vh_brand }}-{{ $vehicle->vh_plate }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Requestor</label>
+                        <select class="form-select" name="requestor_edit" id="requestor_edit" id="requestor_edit">
+                            @foreach ($requestors as $requestor)
+                            <option value="{{ $requestor->requestor_id }}" id="requestor_value">{{ $requestor->rq_full_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">   
+                            <label for="voucher_edit" class="form-label mb-0">Voucher</label>
+                            <input type="text" class="form-control rounded-1" name="voucher_edit" id="voucher_edit" value="">                     
+                    </div>
+                    <div class="form-group">
+                        <label>Travel Type : </label>
+                        <select class="form-select" name="travel_edit" id="travel_edit">
+                            <option value="1">Outside Province Transport</option>       
+                            <option value="1">Daily Transport</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="approval_status_edit">Approval Status</label>
+                        <select name="approval_status_edit" id="approval_status_edit">
+                            <option value="Approved">Approved</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Rejected">Rejected</option>
+                          </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="status_edit">Status</label>
+                        <select name="status_edit" id="status_edit">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Cancelled">Cancelled</option>
+                          </select>
+                    </div>
+                    <input type="hidden" name="action" id="action" value="Add" />
+                    <input type="hidden" name="hidden_id" id="hidden_id" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <input type="submit" name="action_button" id="action_button" value="Update" class="btn btn-info"/>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> 
+<!-------------DELETE MODAL --------------->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" id="events_form" class="form-horizontal">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalLabel">Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h4 align="center" style="margin:0;">Are you sure you want to remove this data?</h4>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger">OK</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div
 </body>
 <script type="text/javascript">
     $(document).ready(function() {
@@ -196,6 +292,18 @@
     serverSide: true,
     dom: 'Blfrtip',
     buttons: [
+        {
+            text: 'Word',
+            action: function ( e, dt, node, config ) {
+                window.location.href='/reservations-word';
+            }
+        },
+        {
+        text: 'Excel',
+        action: function ( e, dt, node, config ) {
+        window.location.href='/reservations-excel';
+                }
+        }
         // {
         //         text: 'Word',
         //         action: function ( e, dt, node, config ) {
@@ -266,7 +374,7 @@
  // STORE---------------------------//
         $('#reservations-form').on('submit', function(event) {
             event.preventDefault();
-            var action_url = "{{url('/insert-reservations')}}";
+            var action_url = "{{url('/insert-reservation')}}";
             $.ajax({
                 type: 'post'
                 , headers: {
@@ -303,25 +411,25 @@
   // EDIT---------------------------//
   $(document).on('click', '.edit', function(event){
              event.preventDefault();
-             var driver_id= $(this).attr('id');
-            //  alert(driver_id);
+             var reservation_id= $(this).attr('id');
+            //  alert(reservation_id);
              $('#form_result').html('');
              $.ajax({
-             url :"/edit-driver/"+driver_id+"/",
+             url :"/edit-reservation/"+reservation_id+"/",
              headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
              dataType:"json",
              success:function(data)
              {
-             $('#dr_emp_id_modal').val(data.result.dr_emp_id);
-             $('#dr_name_modal').val(data.result.dr_name);
-             $('#dr_office_modal').val(data.result.off_name);
-             $('#dr_status_modal').val(data.result.dr_status);
-             $('#hidden_id').val(driver_id);
-             $('.modal-title').text('Edit Record');
-             $('#action_button').val('Update');
-             $('#action').val('Edit');
-             $('#formModal').modal('show');
-             
+
+            $('#event_edit').val(data.result.event_id);
+            $('#vehicle_edit').val(data.result.vehicle_id);
+            $('#driver_edit').val(data.result.driver_id);
+            $('#requestor_edit').val(data.result.requestor_id);
+            $('#voucher_edit').val(data.result.rs_voucher);
+            $('#approval_status_edit').val(data.result.rs_approval_status);
+            $('#status_edit').val(data.result.rs_status);
+            $('#hidden_id').val(reservation_id);
+            $('#reservation_modal').modal('show'); 
              },
              error: function(data) {
              var errors = data.responseJSON;
@@ -331,9 +439,9 @@
              });
          // EDIT---------------------------//
         //UPDATE------------------------------------------//
-        $('#driver_modal').on('submit', function(event) {
+        $('#reservation_edit').on('submit', function(event) {
                     event.preventDefault();
-                    var action_url = "{{ url('/update-driver')}}";
+                    var action_url = "{{ url('/update-reservation')}}";
 
                     $.ajax({
                         type: 'post'
@@ -355,9 +463,9 @@
                             }
                             if (data.success) {
                                 html = "<div class='alert alert-info alert-dismissible fade show py-1 px-4 d-flex justify-content-between align-items-center' role='alert'><span>&#8505; &nbsp;" + data.success + "</span><button type='button' class='btn fs-4 py-0 px-0' data-bs-dismiss='alert' aria-label='Close'>&times;</button></div>";
-                                $('#driver-table').DataTable().ajax.reload();
-                                $('#formModal').modal('hide');
-                                $('#driver_modal')[0].reset();
+                                $('#reservations-table').DataTable().ajax.reload();
+                                $('#reservation_modal').modal('hide');
+                                $('#reservation_edit')[0].reset();
                                 
 
                             }
@@ -371,19 +479,19 @@
                 });
         //UPDATE------------------------------------------//
         // DELETE---------------------------//
-        var driver_id;
+        var reservation_id;
         $(document).on('click', '.delete', function() {
-            driver_id = $(this).attr('id');
+            reservation_id = $(this).attr('id');
             $('#confirmModal').modal('show');
         });
 
         $('#ok_button').click(function() {
             $.ajax({
-                url: "/delete-driver/" + driver_id
+                url: "/delete-reservation/" + reservation_id
                 , success: function(data) {
                     setTimeout(function() {
                         $('#confirmModal').modal('hide');
-                        $('#driver-table').DataTable().ajax.reload();
+                        $('#reservations-table').DataTable().ajax.reload();
                     });
                 }
             })

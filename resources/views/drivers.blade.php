@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <?php$title_page = 'LAKBAY Reservation System';?>
+    <title>Drivers</title>
+    <?php$title_page = 'Drivers';?>
     @include('includes.header')
 </head>
 <body>
@@ -123,6 +124,7 @@
                     <div class="form-group">
                         <label>Office</label>
                         <select name="dr_office_modal" id="dr_office_modal" class="form-control">
+                            <option id="off_value" name="off_value"></option>
                             @foreach ($offices as $office)
                                 <option value="{{ $office->off_id }}">{{ $office->off_acr }}</option>
                             @endforeach 
@@ -272,9 +274,10 @@
              dataType:"json",
              success:function(data)
              {
+            //  alert(data.result.dr_emp_id);
              $('#dr_emp_id_modal').val(data.result.dr_emp_id);
              $('#dr_name_modal').val(data.result.dr_name);
-             $('#dr_office_modal').val(data.result.off_name);
+             $('#off_value').text(data.result.off_acr);
              $('#dr_status_modal').val(data.result.dr_status);
              $('#hidden_id').val(driver_id);
              $('.modal-title').text('Edit Record');

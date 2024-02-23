@@ -12,6 +12,9 @@ use PhpOffice\PhpWord\Shared\XMLWriter;
 use PhpOffice\PhpWord\Shared\ZipArchive;
 use PhpOffice\PhpWord\TemplateProcessor;    
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class DriversController extends Controller
 {
@@ -81,7 +84,7 @@ class DriversController extends Controller
     public function edit($driver_id)
     {
         if (request()->ajax()) {
-            $data = Drivers::select('drivers.*', 'offices.off_name')
+            $data = Drivers::select('drivers.*', 'offices.off_acr')
                 ->leftJoin('offices', 'drivers.off_id', '=', 'offices.off_id')
                 ->findOrFail($driver_id);
             return response()->json(['result' => $data]);
@@ -122,7 +125,7 @@ class DriversController extends Controller
         $rows = Drivers::count();
         $drivers = DB::table('drivers')->select('driver_id','dr_emp_id','dr_name','off_name')->join('offices','drivers.off_id','offices.off_id')->get();
         // dd($drivers);
-        $templateProcessor = new TemplateProcessor(public_path().'\\'."Offices.docx");
+        $templateProcessor = new TemplateProcessor(public_path().'\\'."Drivers.docx");
 
         $templateProcessor->cloneRow('driver_id', $rows);
         for($i=0;$i<$rows;$i++){
@@ -133,25 +136,31 @@ class DriversController extends Controller
             $templateProcessor->setValue("dr_office#".($i+1),$driver->off_name);
         }
         $templateProcessor->saveAs(public_path().'\\'."WordDownloads\sample_downloads.docx");
-        // return response()->download(public_path().'\\'."WordDownloads\sample_downloads.docx", "DriverList.docx")->deleteFileAfterSend(true);
+        return response()->download(public_path().'\\'."WordDownloads\sample_downloads.docx", "DriverList.docx")->deleteFileAfterSend(true);
     }
     public function driver_excel(Request $request)
     {
+        $templateFilePath = 'Drivers.xlsx';
+        $spreadsheet = new Spreadsheet();
         $rows = Drivers::count();
         $drivers = DB::table('drivers')->select('driver_id','dr_emp_id','dr_name','off_name')->join('offices','drivers.off_id','offices.off_id')->get();
-        // dd($drivers);
-        $templateProcessor = new TemplateProcessor(public_path().'\\'."Drivers.xlsx");
-        $templateProcessor->cloneRow('driver_id', $rows);
-
-        for($i=0;$i<$rows;$i++){
-            $driver=$drivers[$i];
-            $templateProcessor->setValue("driver_id#".($i+1),$driver->driver_id);
-            $templateProcessor->setValue("dr_emp_id#".($i+1),$driver->dr_emp_id);
-            $templateProcessor->setValue("dr_name#".($i+1),$driver->dr_name);
-            $templateProcessor->setValue("dr_office#".($i+1),$driver->off_name);
-        }
+        $spreadsheet = IOFactory::load($templateFilePath);
+        $sheet = $spreadsheet->getActiveSheet();
         
-        $templateProcessor->saveAs(public_path().'\\'."ExcelDownloads\sample_downloads.xlsx");
-        return response()->download(public_path().'\\'."ExcelDownloads\sample_downloads.xlsx", "DriverList.xlsx")->deleteFileAfterSend(true);  
+        for ($i = 0; $i < $rows; $i++) {
+            $driver = $drivers[$i];
+            $rowIndex = $i + 2; 
+    
+            $sheet->setCellValue('A' . $rowIndex, $driver->driver_id);
+            $sheet->setCellValue('B' . $rowIndex, $driver->dr_emp_id);
+            $sheet->setCellValue('C' . $rowIndex, $driver->dr_name);
+            $sheet->setCellValue('D' . $rowIndex, $driver->off_name);
+        }
+
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $fileName = 'Lakbay_Drivers.xlsx';
+        $writer->save($fileName);
+
+        return response()->download($fileName)->deleteFileAfterSend(true);
     }
 }

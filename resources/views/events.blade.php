@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Events</title>
      <?php $title_page = 'LAKBAY Reservation System';?>
      @include('includes.header')
 
@@ -128,7 +128,7 @@
             </div>
         </div>
     </div> 
-    <!--- --->
+    <!---DELETE--->
     <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
