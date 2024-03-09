@@ -22,11 +22,7 @@ class ReservationsFactory extends Factory
     {
         return [
             'rs_voucher' => fake()->randomNumber(),
-            'rs_daily_transport' => fake()->boolean(),
-            'rs_outside_province' => function(array $attributes) {
-                return !$attributes['rs_daily_transport'];
-            },
-            'rs_date_filed' => fake()->date(),
+            'rs_travel_type'=> fake()->randomElement(['Daily Travel', 'Outside Province']),
             'rs_approval_status' => fake()->randomElement(['Pending', 'Approved', 'Rejected']),
             'rs_status' => fake()->randomElement(['Active', 'Inactive','Cancelled']),
             'event_id' => fake()->numberBetween(1,10), // Assuming event_id is a foreign key

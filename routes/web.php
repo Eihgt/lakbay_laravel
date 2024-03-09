@@ -50,9 +50,9 @@ Route::get('/driver-word', [DriversController::class, 'driver_word']);
 Route::get('/driver-excel', [DriversController::class, 'driver_excel']);
 //End
 //Vehicles Section
-// Route::post('/insert-driver',[DriversController::class,'store']);
+Route::post('/insert-vehicle',[VehiclesController::class,'store']);
 Route::get('/vehicles', [VehiclesController::class, 'show'])->name('vehicles.show');
-// Route::get('/delete-driver/{driver_id}', [DriversController::class, 'delete']);
+Route::get('/delete-vehicle/{vehicle_id}', [VehiclesController::class, 'delete']);
 // Route::get('/edit-driver/{driver_id}', [DriversController::class, 'edit']);
 // Route::post('/update-driver', [DriversController::class, 'update']);
 // Route::get('/driver-word', [DriversController::class, 'driver_word']);
@@ -78,6 +78,7 @@ Route::get('/offices-word', [OfficesController::class, 'offices_word']);
 Route::get('/reservations', [ReservationsController::class,'show'])->name('reservations.show');
 Route::get('/reservations-word', [ReservationsController::class, 'reservations_word']);
 Route::get('/reservations-excel', [ReservationsController::class, 'reservations_excel']);
+Route::get('/reservations-pdf', [ReservationsController::class, 'reservations_pdf']);
 Route::post('/insert-reservation', [ReservationsController::class, 'store']);
 Route::post('/update-reservation', [ReservationsController::class, 'update']);
 Route::get('/edit-reservation/{reservation_id}', [ReservationsController::class, 'edit']);

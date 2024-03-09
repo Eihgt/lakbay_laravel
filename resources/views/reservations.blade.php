@@ -279,11 +279,11 @@
             </form>
         </div>
     </div>
-</div
+</div>
 </body>
 <script type="text/javascript">
     $(document).ready(function() {
-    var table = $('.reservations-table').DataTable({
+        var table = $('.reservations-table').DataTable({
     lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
     search: {
         return: true
@@ -295,81 +295,42 @@
         {
             text: 'Word',
             action: function ( e, dt, node, config ) {
-                window.location.href='/reservations-word';
+                window.location.href='/reservations-word?search=' + searchValue;
             }
         },
         {
-        text: 'Excel',
-        action: function ( e, dt, node, config ) {
-        window.location.href='/reservations-excel';
-                }
+            text: 'Excel',
+            action: function ( e, dt, node, config ) {
+                var searchValue = $('.dataTables_filter input').val();
+                window.location.href = '/reservations-excel?search=' + searchValue;
+            }
+        },
+        {
+            text: 'Pdf',
+            action: function ( e, dt, node, config ) {
+                var searchValue = $('.dataTables_filter input').val();
+                window.location.href = '/reservations-pdf?search=' + searchValue;
+            }
         }
-        // {
-        //         text: 'Word',
-        //         action: function ( e, dt, node, config ) {
-        //             window.location.href='/driver-word';
-        //         }
-        // },
-        // {
-        //         text: 'Excel',
-        //         action: function ( e, dt, node, config ) {
-        //             window.location.href='/driver-excel';
-        //         }
-        // }
-    //     {
-    //         extend: 'excel',
-    //         exportOptions: {
-    //             columns: ':visible'
-    //         }
-    //     },
-    //     {
-    //         extend: 'print',
-    //         exportOptions: {
-    //             columns: ':visible'
-    //         }
-    //     },
-    //     {
-    //         extend: 'pdf',
-    //         exportOptions: {
-    //             columns: ':visible'
-    //         }
-    //     },
-    //     {
-    //         extend: 'copy',
-    //         exportOptions: {
-    //             columns: ':visible'
-    //         }
-    //     },
-    //     {
-    //         extend: 'csv',
-    //         exportOptions: {
-    //             columns: ':visible'
-    //         }
-    //     },
-    //     'colvis'
-    // ],
-    // columnDefs: [
-    //     {
-    //         targets: 0,
-    //         visible: true
-    //     }
     ],
     ajax: "{{ route('reservations.show') }}",
     columns: [
-    {data: 'reservation_id', name: 'reservation_id'},
-    {data: 'ev_name', name: 'events.ev_name'},
-    {data: 'dr_name', name: 'drivers.dr_name'},
-    {data: 'vh_brand', name: 'vehicles.vh_brand'},
-    {data: 'rq_full_name', name: 'requestors.rq_full_name'},
-    {data: 'rs_voucher', name: 'rs_voucher'},
-    {data: 'rs_daily_transport', name: 'rs_daily_transport'},
-    {data: 'created_at', name: 'created_at'},
-    {data: 'rs_approval_status', name: 'rs_approval_status'},
-    {data: 'rs_status', name: 'rs_status'},
-    {data: 'action', name: 'action', orderable: false, searchable: false},
-]
-
+        {data: 'reservation_id', name: 'reservation_id'},
+        {data: 'ev_name', name: 'events.ev_name'},
+        {data: 'dr_name', name: 'drivers.dr_name'},
+        {data: 'vh_brand', name: 'vehicles.vh_brand'},
+        {data: 'rq_full_name', name: 'requestors.rq_full_name'},
+        {data: 'rs_voucher', name: 'rs_voucher'},
+        
+        {data: 'rs_travel_type', name: 'rs_travel_type'},
+        {data: 'created_at', name: 'created_at'},
+        {data: 'rs_approval_status', name: 'rs_approval_status'},
+        {data: 'rs_status', name: 'rs_status'},
+        {data: 'action', name: 'action', orderable: false, searchable: false},
+    ]
 });
+
+
 
  // STORE---------------------------//
         $('#reservations-form').on('submit', function(event) {

@@ -15,6 +15,8 @@ use PhpOffice\PhpWord\TemplateProcessor;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\Reader\Word2007;
 
 class ReservationsController extends Controller
 {
@@ -57,9 +59,7 @@ class ReservationsController extends Controller
         $reservations = new Reservations();
         $reservations->reservation_id = $request->reservation_id;
         $reservations->rs_voucher = $request->rs_voucher;
-        $reservations->rs_daily_transport = $request->rs_daily_transport;
-        $reservations->rs_outside_province = $request->rs_outside_province;
-        $reservations->rs_date_filed = $request->rs_date_filed;
+        $reservations->rs_travel_type = $request->rs_travel_type;
         $reservations->rs_approval_status = $request->rs_approval_status;
         $reservations->rs_status = $request->rs_status;
         $reservations->event_id = $request->event_id;
@@ -88,7 +88,7 @@ class ReservationsController extends Controller
         return response()->json(['success' => 'Reservation successfully updated']);
     }
     public function edit($reservation_id)   
-    {
+    {   
         if (request()->ajax()) {
             $data = Reservations::select('reservations.*', 'events.ev_name', 'drivers.dr_name', 'vehicles.vh_brand', 'vehicles.vh_plate', 'requestors.rq_full_name')
                 ->join('events', 'reservations.event_id', '=', 'events.event_id')
@@ -114,7 +114,7 @@ class ReservationsController extends Controller
     
         $templateProcessor = new TemplateProcessor(public_path().'\\'."Reservations.docx");
     
-        $rows = $lenghtMenu->count();
+        $rows = $reservations->count();
     
         $templateProcessor->cloneRow('reservation_id', $rows);
         foreach($reservations as $index => $reservation){
@@ -124,36 +124,55 @@ class ReservationsController extends Controller
             $templateProcessor->setValue("vehicle_id#".($index+1), $reservation->vh_brand .'-'. $reservation->vh_plate);
             $templateProcessor->setValue("requestor_id#".($index+1), $reservation->rq_full_name);
             $templateProcessor->setValue("rs_voucher#".($index+1), $reservation->rs_voucher);
+            $templateProcessor->setValue("rs_travel_type#".($index+1), $reservation->rs_travel_type);
             $templateProcessor->setValue("created_at#".($index+1), $reservation->created_at);
             $templateProcessor->setValue("rs_approval_status#".($index+1), $reservation->rs_approval_status);
             $templateProcessor->setValue("rs_status#".($index+1), $reservation->rs_status);
-            $rs_daily_transport = $reservation->rs_daily_transport == 1 ? 'Daily Transport' : 'Outside Province Transport';
-            $templateProcessor->setValue("rs_daily_transport#".($index+1), $rs_daily_transport);
+           
+            
         }
     
         $templateProcessor->saveAs(public_path().'\\'."WordDownloads\sample_downloads.docx");
-        // return response()->download(public_path().'\\'."WordDownloads\sample_downloads.docx", "ReservationsList.docx")->deleteFileAfterSend(true);
+        return response()->download(public_path().'\\'."WordDownloads\sample_downloads.docx", "ReservationsList.docx")->deleteFileAfterSend(true);
     }
 
     public function reservations_excel(Request $request)
     {
         $templateFilePath = 'Reservations.xlsx';
         $spreadsheet = new Spreadsheet();
-        $rows = Reservations::count();
-        $reservations = DB::table('reservations')
-            ->select('reservations.*', 'events.ev_name', 'drivers.dr_name', 'vehicles.vh_brand', 'vehicles.vh_plate', 'requestors.rq_full_name', 'reservations.created_at', 'reservations.rs_approval_status', 'reservations.rs_status')
+        
+        // Retrieve filtered reservations based on the search value
+        $filteredReservationsQuery = DB::table('reservations')
+            ->select('reservations.*', 'events.ev_name', 'drivers.dr_name', 'vehicles.vh_brand', 'vehicles.vh_plate', 'requestors.rq_full_name')
             ->join('events', 'reservations.event_id', '=', 'events.event_id')
             ->join('drivers', 'reservations.driver_id', '=', 'drivers.driver_id')
             ->join('vehicles', 'reservations.vehicle_id', '=', 'vehicles.vehicle_id')
-            ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id')
-            ->get();
+            ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id');
+    
+        // Apply search filter if a search value is provided
+        if ($request->has('search')) {
+            $searchValue = $request->input('search');
+            $filteredReservationsQuery->where(function ($query) use ($searchValue) {
+                $query->where('ev_name', 'like', '%' . $searchValue . '%')
+                    ->orWhere('dr_name', 'like', '%' . $searchValue . '%')
+                    ->orWhere('vh_brand', 'like', '%' . $searchValue . '%')
+                    ->orWhere('rq_full_name', 'like', '%' . $searchValue . '%')
+                    ->orWhere('rs_voucher', 'like', '%' . $searchValue . '%')
+                    ->orWhere('rs_approval_status', 'like', '%' . $searchValue . '%')
+                    ->orWhere('rs_status', 'like', '%' . $searchValue . '%')
+                    ->orWhere('rs_travel_type', 'like', '%' . $searchValue . '%');
+            });
+        }
+    
+        // Execute the query to get filtered reservations
+        $filteredReservations = $filteredReservationsQuery->get();
+        // dd($filteredReservations);
         $spreadsheet = IOFactory::load($templateFilePath);
         $sheet = $spreadsheet->getActiveSheet();
-
-        for ($i = 0; $i < $rows; $i++) {
-            $reservation = $reservations[$i];
-            $rowIndex = $i + 2; 
-            $rs_daily_transport = $reservation->rs_daily_transport == 1 ? 'Daily Transport' : 'Outside Province Transport';
+    
+        // Populate spreadsheet with filtered reservation data
+        foreach ($filteredReservations as $index => $reservation) {
+            $rowIndex = $index + 2; 
             $formattedDate = Carbon::parse($reservation->created_at)->format('F j, Y');
             $sheet->setCellValue('A' . $rowIndex, $reservation->reservation_id);
             $sheet->setCellValue('B' . $rowIndex, $reservation->ev_name);
@@ -161,18 +180,81 @@ class ReservationsController extends Controller
             $sheet->setCellValue('D' . $rowIndex, $reservation->vh_brand);
             $sheet->setCellValue('E' . $rowIndex, $reservation->rq_full_name);
             $sheet->setCellValue('F' . $rowIndex, $reservation->rs_voucher);
-            $sheet->setCellValue('G' . $rowIndex, $rs_daily_transport);
+            $sheet->setCellValue('G' . $rowIndex, $reservation->rs_travel_type);
             $sheet->setCellValue('H' . $rowIndex, $formattedDate);
             $sheet->setCellValue('I' . $rowIndex, $reservation->rs_approval_status);
             $sheet->setCellValue('J' . $rowIndex, $reservation->rs_status);
         }
-
+    
+        // Save and download the spreadsheet
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         $fileName = 'Lakbay_Reservations.xlsx';
         $writer->save($fileName);
-
+    
         return response()->download($fileName)->deleteFileAfterSend(true);
     }
+    public function reservations_pdf(Request $request)
+    {
+        $filteredReservationsQuery = DB::table('reservations')
+            ->select('reservations.*', 'events.ev_name', 'drivers.dr_name', 'vehicles.vh_brand', 'vehicles.vh_plate', 'requestors.rq_full_name', 'reservations.created_at', 'reservations.rs_approval_status', 'reservations.rs_status')
+            ->join('events', 'reservations.event_id', '=', 'events.event_id')
+            ->join('drivers', 'reservations.driver_id', '=', 'drivers.driver_id')
+            ->join('vehicles', 'reservations.vehicle_id', '=', 'vehicles.vehicle_id')
+            ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id');
+    
+        if ($request->has('search')) {
+            $searchValue = $request->input('search');
+            $filteredReservationsQuery->where(function ($query) use ($searchValue) {
+                $query->where('ev_name', 'like', '%' . $searchValue . '%')
+                    ->orWhere('dr_name', 'like', '%' . $searchValue . '%')
+                    ->orWhere('vh_brand', 'like', '%' . $searchValue . '%')
+                    ->orWhere('rq_full_name', 'like', '%' . $searchValue . '%')
+                    ->orWhere('rs_voucher', 'like', '%' . $searchValue . '%')
+                    ->orWhere('rs_approval_status', 'like', '%' . $searchValue . '%')
+                    ->orWhere('rs_status', 'like', '%' . $searchValue . '%')
+                    ->orWhere('rs_travel_type', 'like', '%' . $searchValue . '%');
+            });
+        }
+
+        $filteredReservations = $filteredReservationsQuery->get();
+        $phpWord = new PhpWord();
+    
+        // Load the template
+        $templateProcessor = new TemplateProcessor(public_path('Reservations.docx'));
+    
+        $rows = $filteredReservations->count();
+    
+        $templateProcessor->cloneRow('reservation_id', $rows);
+        foreach ($filteredReservations as $index => $reservation) {
+            $templateProcessor->setValue("reservation_id#" . ($index + 1), $reservation->reservation_id);
+            $templateProcessor->setValue("event_id#" . ($index + 1), $reservation->ev_name);
+            $templateProcessor->setValue("driver_id#" . ($index + 1), $reservation->dr_name);
+            $templateProcessor->setValue("vehicle_id#" . ($index + 1), $reservation->vh_brand . '-' . $reservation->vh_plate);
+            $templateProcessor->setValue("requestor_id#" . ($index + 1), $reservation->rq_full_name);
+            $templateProcessor->setValue("rs_voucher#" . ($index + 1), $reservation->rs_voucher);
+            $templateProcessor->setValue("rs_travel_type#" . ($index + 1), $reservation->rs_travel_type);
+            $templateProcessor->setValue("created_at#" . ($index + 1), $reservation->created_at);
+            $templateProcessor->setValue("rs_approval_status#" . ($index + 1), $reservation->rs_approval_status);
+            $templateProcessor->setValue("rs_status#" . ($index + 1), $reservation->rs_status);
+        }
+    
+        // Save the modified template
+        $templateProcessor->saveAs(public_path('PdfDownloads/sample_downloads.docx'));
+    
+        // Load the modified template
+        $reader = new Word2007();
+        $content = $reader->load(public_path('PdfDownloads/sample_downloads.docx'));
+    
+        // Create PDF writer
+        $pdfWriter = IOFactory::createWriter($content, 'PDF');
+    
+        // Save PDF file
+        $pdfFileName = "ReservationsList.pdf";
+        $pdfWriter->save(public_path('uploads/' . $pdfFileName));
+    
+        // Return response for PDF download
+        return response()->download(public_path('uploads/' . $pdfFileName))->deleteFileAfterSend(true);
+    }
+}
     
 
-}

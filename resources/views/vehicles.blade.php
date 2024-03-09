@@ -18,7 +18,8 @@
     </div>
     <div class="row mb-3">
         <div class="col">
-            <form action="" method="POST" class="">
+            <form action="" method="POST" class="vehicles-form" id="vehicles-form" name="vehicles-form">
+                @csrf
                 <div class="card rounded-0">
                     <div class="card-header fs-6 bg-transparent text-dark rounded-0 pt-2 text-uppercase">
                         Input/Filter Form
@@ -28,8 +29,8 @@
                         <div class="row">
                             <div class="col">
                                 <div class="mb-2">
-                                    <label for="vh_plate_number" class="form-label mb-0">Plate Number</label>
-                                    <input type="text" class="form-control rounded-1" name="vh_plate_number" placeholder="Enter vehicle name" value="">
+                                    <label for="vh_plate" class="form-label mb-0">Plate Number</label>
+                                    <input type="text" class="form-control rounded-1" name="vh_plate" id="vh_plate" placeholder="Enter vehicle name" value="">
                                 </div>
                             </div>
                             <div class="col">
@@ -90,9 +91,10 @@
         </div>
 
     </div>
+    <span id="form_result"></span>
     <div class="row">
         <div class="col">
-            <table class="table table-bordered table-hover vehicles-table" id="vehicles-id" name="vehicles-id">
+            <table class="table table-bordered table-hover vehicle-table" id="vehicles-id" name="vehicles-id">
                 <thead>
                     <tr>
                         <td>ID</td>
@@ -109,9 +111,28 @@
             </table>
         </div>
     </div>
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" id="vehicle_delete" class="form-horizontal">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ModalLabel">Confirmation</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h4 align="center" style="margin:0;">Are you sure you want to remove this data?</h4>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" name="ok_button" id="ok_button" class="btn btn-danger">OK</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <script type="text/javascript">
         $(document).ready(function() {
-        var table = $('.vehicles-table').DataTable({
+        var table = $('.vehicle-table').DataTable({
         lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
         search: {
             return: true
@@ -192,9 +213,9 @@
     });
     
      // STORE---------------------------//
-            $('#reservations-form').on('submit', function(event) {
+            $('#vehicles-form').on('submit', function(event) {
                 event.preventDefault();
-                var action_url = "{{url('/insert-reservations')}}";
+                var action_url = "{{url('/insert-vehicle')}}";
                 $.ajax({
                     type: 'post'
                     , headers: {
@@ -215,8 +236,8 @@
                         }
                         if (data.success) {
                             html = "<div class='alert alert-info alert-dismissible fade show py-1 px-4 d-flex justify-content-between align-items-center' role='alert'><span>&#8505; &nbsp;" + data.success + "</span><button type='button' class='btn fs-4 py-0 px-0' data-bs-dismiss='alert' aria-label='Close'>&times;</button></div>";
-                            $('#reservations-table').DataTable().ajax.reload();
-                            $('#reservations-form')[0].reset();
+                            $('#vehicle-table').DataTable().ajax.reload();
+                            $('#vehicles-form')[0].reset();
     
                         }
                         $('#form_result').html(html);
@@ -299,21 +320,29 @@
                     });
             //UPDATE------------------------------------------//
             // DELETE---------------------------//
-            var driver_id;
+            var vehicle_id;
             $(document).on('click', '.delete', function() {
-                driver_id = $(this).attr('id');
+                vehicle_id = $(this).attr('id');
                 $('#confirmModal').modal('show');
             });
     
             $('#ok_button').click(function() {
                 $.ajax({
-                    url: "/delete-driver/" + driver_id
+                    url: "/delete-vehicle/" + vehicle_id
                     , success: function(data) {
                         setTimeout(function() {
                             $('#confirmModal').modal('hide');
-                            $('#driver-table').DataTable().ajax.reload();
+                            $('#vehicle-table').DataTable().ajax.reload();
                         });
+                        if (data.success) {
+                                html = "<div class='alert alert-info alert-dismissible fade show py-1 px-4 d-flex justify-content-between align-items-center' role='alert'><span>&#8505; &nbsp;" + data.success + "</span><button type='button' class='btn fs-4 py-0 px-0' data-bs-dismiss='alert' aria-label='Close'>&times;</button></div>";
+                                $('#driver-table').DataTable().ajax.reload();
+                                $('#formModal').modal('hide');
+                                $('#driver_modal')[0].reset();
+                                }
+                            
                     }
+                   
                 })
             });
             //DELETE---------------------------//

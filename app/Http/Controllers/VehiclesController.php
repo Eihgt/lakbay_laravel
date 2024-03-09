@@ -31,4 +31,22 @@ class VehiclesController extends Controller
         
         return view('vehicles');
     }
+    public function store(Request $request){
+        $vehicles = new Vehicles();
+        $vehicles->vh_plate = $request->vh_plate;
+        $vehicles->vh_type = $request->vh_type;
+        $vehicles->vh_brand = $request->vh_brand;
+        $vehicles->vh_year = $request->vh_year;
+        $vehicles->vh_fuel_type = $request->vh_fuel_type;
+        $vehicles->vh_condition = $request->vh_condition;
+        $vehicles->vh_status = $request->vh_status;
+        $vehicles->vh_year = $request->vh_year;
+        $vehicles->save();
+        return response()->json(['success' => 'Vehicle successfully registered']);
+    }
+    public function delete($vehicle_id){
+        $data = Vehicles::findOrFail($vehicle_id);
+        $data->delete();
+        return response()->json(['success' => 'Vehicle successfully Deleted']);
+    }
 }
