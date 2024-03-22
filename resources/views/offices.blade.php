@@ -15,6 +15,15 @@
     </div>
     <div class="row mb-3">
         <div class="col">
+            <a href="#insertModal" role="button" class="btn btn-lg btn-success" id="insertBtn" data-bs-toggle="modal">Register</a>
+            <div id="insertModal" class="modal fade" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Offices Form</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
             <form action="" method="POST" class="insert_form" id="insert_form">
                 @csrf
                 <div class="card rounded-0">
@@ -25,30 +34,36 @@
                                 <div class="mb-2">
                                     <label for="off_acr" class="form-label mb-0">Office Acronym</label>
                                     <input type="text" class="form-control rounded-1" name="off_acr" placeholder="Enter Office acronym" value="">
+                                    <span id="off_acr_error" name="off_acr_error"></span>
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="mb-2">
                                     <label for="off_name" class="form-label mb-0">Office Full Name</label>
                                     <input type="text" class="form-control rounded-1" name="off_name" placeholder="Enter office's full name" value="">
+                                    <span id="off_name_error"></span>
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="mb-2">
                                     <label for="off_head" class="form-label mb-0">Office Head</label>
                                     <input type="text" class="form-control rounded-1" name="off_head" placeholder="Enter  office's head" value="">
+                                    <span id="off_head_error"></span>
                                 </div>
                             </div>
 
                         </div>
-                        <div class="row mt-2 d-flex justify-content-end align-items-center">
-                            <div class="col-3 btn-group">
-                                <button type="submit" name="submit" value="insert" class="btn btn-outline-primary px-4 py-1 w-100 rounded-1">Submit</button>
-                            </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="submit" value="insert" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
                         </div>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
     <div class="container">
@@ -131,6 +146,11 @@
     </body>
 <script type="text/javascript">
     $(document).ready(function() {
+        $("#insertModal").modal("hide");
+        $("#insertBtn").click(function() {
+        $("#insertModal").modal("show");
+    });
+
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -147,10 +167,26 @@
             buttons: [
                 {   
                 text: 'Word',
+               
                 action: function ( e, dt, node, config ) {
-                    window.location.href='/offices-word';
+                    var searchValue = $('.dataTables_filter input').val();
+                    window.location.href='/offices-word?search='+searchValue;
                 }
-        },
+        },{
+            
+            text: 'Excel',
+                action: function ( e, dt, node, config ) {
+                    var searchValue = $('.dataTables_filter input').val();
+                    window.location.href='/offices-excel?search='+searchValue;
+                }
+        },{
+            
+            text: 'PDF',
+                action: function ( e, dt, node, config ) {
+                    var searchValue = $('.dataTables_filter input').val();
+                    window.location.href='/offices-pdf?search='+searchValue;
+                }
+        }
         // {
         //     extend: 'excel',
         //     exportOptions: {
@@ -222,17 +258,7 @@
             data:$(this).serialize(),
             dataType: 'json',
             success: function(data) {
-                console.log('success: '+data);
                 var html = '';
-                if(data.errors)
-                {
-                    html = '<div class="alert alert-danger">';
-                    for(var count = 0; count < data.errors.length; count++)
-                    {
-                        html += '<p>' + data.errors[count] + '</p>';
-                    }
-                    html += '</div>';
-                }
                 if(data.success) 
                 {
                     html = "<div class='alert alert-info alert-dismissible fade show py-1 px-4 d-flex justify-content-between align-items-center' role='alert'><span>&#8505; &nbsp;"+data.success+"</span><button type='button' class='btn fs-4 py-0 px-0' data-bs-dismiss='alert' aria-label='Close'>&times;</button></div>";
@@ -244,8 +270,11 @@
                 $('#form_result').html(html);
             },
             error: function(data) {
-                var errors = data.responseJSON;
-                console.log(errors);
+                var errors = data.responseJSON.errors;
+                var html = '<div class="alert alert-danger">';
+                    $.each(errors,function(key,value){
+                        // console.log(key);
+                    });
             }
         });
     });
@@ -267,13 +296,17 @@
                     html = "<div class='alert alert-info alert-dismissible fade show py-1 px-4 d-flex justify-content-between align-items-center' role='alert'><span>&#8505; &nbsp;"+data.success+"</span><button type='button' class='btn fs-4 py-0 px-0' data-bs-dismiss='alert' aria-label='Close'>&times;</button></div>";
                     $('#office-table').DataTable().ajax.reload();
                     $('#insert_form')[0].reset();
+                    $('#insertModal').hide();
                     
                 }
                 $('#form_result').html(html);
             },
             error: function(data) {
-                var errors = data.responseJSON;
-                console.log(errors);
+                var errors = data.responseJSON.errors;
+                var html = '<div class="alert alert-danger">';
+                $.each(errors, function(key,value){
+                $('#' + key+'_error').html('<span class="text-danger">' + value + '</span>');
+                });
             }
         });
     });
@@ -326,6 +359,13 @@
             })
             });
             //DELETE---------------------------//
+    document.addEventListener("DOMContentLoaded", function() {
+        var btn = document.getElementById("insertBtn");
+        btn.addEventListener("click", function() {
+        var insertModal = new bootstrap.Modal(document.getElementById("insertModal"));
+        insertModal.show();
+    });
+});
             });
 
 </script>

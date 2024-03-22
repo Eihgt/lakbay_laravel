@@ -51,6 +51,11 @@ class RequestorsController extends Controller
                 'rq_full_name' => $request->rq_full_name,
                 'rq_office' => $request->rq_office,
             ]);
+
+            $validate = $request->validate([
+                'rq_full_name'=>'required',
+                'rq_office'=>'required',
+            ]);
        return Response()->json($requestor);
     }
 

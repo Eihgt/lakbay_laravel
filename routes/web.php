@@ -48,15 +48,18 @@ Route::get('/edit-driver/{driver_id}', [DriversController::class, 'edit']);
 Route::post('/update-driver', [DriversController::class, 'update']);
 Route::get('/driver-word', [DriversController::class, 'driver_word']);
 Route::get('/driver-excel', [DriversController::class, 'driver_excel']);
+Route::get('/driver-pdf', [DriversController::class, 'driver_pdf']);
 //End
 //Vehicles Section
 Route::post('/insert-vehicle',[VehiclesController::class,'store']);
 Route::get('/vehicles', [VehiclesController::class, 'show'])->name('vehicles.show');
 Route::get('/delete-vehicle/{vehicle_id}', [VehiclesController::class, 'delete']);
-// Route::get('/edit-driver/{driver_id}', [DriversController::class, 'edit']);
-// Route::post('/update-driver', [DriversController::class, 'update']);
-// Route::get('/driver-word', [DriversController::class, 'driver_word']);
-// Route::get('/driver-excel', [DriversController::class, 'driver_excel']);
+Route::get('/vehicle-word', [VehiclesController::class, 'vehicles_word']);
+Route::get('/vehicle-excel', [VehiclesController::class, 'vehicles_excel']);
+Route::get('/vehicle-pdf', [VehiclesController::class, 'vehicles_pdf']);
+Route::get('/edit-vehicle/{vehicle_id}', [VehiclesController::class, 'edit']);
+Route::post('/update-vehicle', [VehiclesController::class, 'update']);
+
 //End
 //Event Section
 Route::post('/insert-event', [EventsController::class, 'store']);
@@ -64,7 +67,9 @@ Route::get('/events',[EventsController::class,'show'])->name('events.show');
 Route::get('/edit-event/{event_id}', [EventsController::class, 'edit']);
 Route::post('/update-event', [EventsController::class, 'update']);
 Route::get('/delete-event/{event_id}', [EventsController::class, 'delete']);
-Route::get('/events-word', [OfficesController::class, 'events_word']);
+Route::get('/events-word', [EventsController::class, 'events_word']);
+Route::get('/events-excel', [EventsController::class, 'events_excel']);
+Route::get('/events-pdf', [EventsController::class, 'events_pdf']);
 //End
 //Offices Section
 Route::get('/offices', [OfficesController::class, 'show'])->name('offices.show');
@@ -73,6 +78,8 @@ Route::get('/delete-office/{off_id}', [OfficesController::class, 'delete']);
 Route::get('/edit-office/{off_id}', [OfficesController::class, 'edit']);
 Route::post('/update-office', [OfficesController::class, 'update']);
 Route::get('/offices-word', [OfficesController::class, 'offices_word']);
+Route::get('/offices-excel', [OfficesController::class, 'offices_excel']);
+Route::get('/offices-pdf', [OfficesController::class, 'offices_pdf']);
 //End
 //Reservation Section
 Route::get('/reservations', [ReservationsController::class,'show'])->name('reservations.show');

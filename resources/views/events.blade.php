@@ -18,12 +18,18 @@
 </div>
 <div class="row mb-3">
     <div class="col">
+    <a href="#insertModal" role="button" class="btn btn-lg btn-success" id="insertBtn" data-bs-toggle="modal">Register</a>
+            <div id="insertModal" class="modal fade" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Events Form</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
         <form method="POST" id="insert_form" name="insert_form" class="insert_form">
             @csrf
             <div class="card rounded-0">
-                <div class="card-header fs-6 bg-transparent text-dark rounded-0 pt-2 text-uppercase">
-                    Input/Filter Form
-                </div>
                 <div class="card-body">
                     <input type="hidden" name="event_id" value="">
                     <div class="row">
@@ -31,6 +37,7 @@
                             <div class="mb-2">
                                 <label for="ev_name" class="form-label mb-0">Event Name</label>
                                 <input type="text" class="form-control rounded-1" name="ev_name" id="ev_name" placeholder="Enter event name" value="">
+                                <span id="ev_name_error"></span>
 
                             </div>
                         </div>
@@ -38,7 +45,7 @@
                             <div class="mb-2">
                                 <label for="ev_venue" class="form-label mb-0">Venue</label>
                                 <input type="text" class="form-control rounded-1" name="ev_venue" id="ev_venue" placeholder="Enter event's venue" value="">
-
+                                <span id="ev_venue_error"></span>
                             </div>
                         </div>
                     </div>
@@ -47,42 +54,44 @@
                             <div class="mb-2">
                                 <label for="ev_date_start" class="form-label mb-0">Start Date</label>
                                 <input type="date" class="form-control rounded-1" name="ev_date_start" id="ev_date_start" placeholder="Enter event's start date" value="">
-
+                                <span id="ev_date_start_error"></span>
                             </div>
                         </div>
                         <div class="col">
                             <div class="mb-2">
                                 <label for="ev_time_start" class="form-label mb-0">Start time</label>
                                 <input type="time" class="form-control rounded-1" name="ev_time_start" id="ev_time_start" placeholder="Enter event's start time" value="">
-
+                                <span id="ev_time_start_error"></span>
                             </div>
                         </div>
                         <div class="col">
                             <div class="mb-2">
                                 <label for="ev_date_end" class="form-label mb-0">End Date</label>
                                 <input type="date" class="form-control rounded-1" name="ev_date_end" id="ev_date_end" placeholder="Enter event's end date" value="">
-
+                                <span id="ev_date_end_error"></span>
                             </div>
                         </div>
                         <div class="col">
                             <div class="mb-2">
                                 <label for="ev_time_end" class="form-label mb-0">End Time</label>
                                 <input type="time" class="form-control rounded-1" name="ev_time_end" id="ev_time_end" placeholder="Enter event's end time" value="">
-
+                                <span id="ev_time_end_error"></span>
                             </div>
                         </div>
                     </div>
                     <div class="row">
-
-                        <div class="col-3"></div>           
-                        <div class="col-3 btn-group">
-                            <button type="submit" name="submit" value="insert" class="btn btn-outline-primary btn-sm h-50 mt-4 px-4 py-2 w-100 rounded-1">Submit</button>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" name="submit" value="insert" class="btn btn-primary">Submit</button>
                         </div>
                     </div>
                 </div>
             </div>
         </form>
-    </div>
+</div>
+     </div>
+        </div>
+            </div>
     <div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -148,39 +157,9 @@
             </div>
         </div>
     </div>
+  </div>
 </div>
-<div class="row">
-    <div class="col-7">
-        <nav aria-label="...">
-            <ul class="pagination rounded-1">
-                <li class="page-item disabled">
-                    <a class="page-link rounded-0" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-                </li>
-                
-                <li class="page-item active" aria-current="page">
-                    <a href='' class="links">
-                        
-                    </a>
-                </li>
-                                                                                                 
-                <li class="page-item">
-                    <a class="page-link rounded-0" href="#">Next</a>
-                </li>
-            </ul>
-        </nav>
-    </div>
-    <div class="col-5">
-        <div class="row">
-            {{-- <form action="" method="POST" class="w-100">
-                <div class="input-group flex-nowrap">
-                    <span class="input-group-text rounded-0" id="addon-wrapping">Filter</span>
-                    <input type="text" name="keyword" class="form-control rounded-0" placeholder="Enter Keyword" aria-label="Username" aria-describedby="addon-wrapping">
-                    <button class="btn btn-outline-secondary rounded-0 px-4" type="submit" name="submit" value="filter">Go</button>
-                </div>
-            </form> --}}
-        </div>
-    </div>
-</div>
+
 <span id="form_result"></span>
 <div class="row">
     <div class="col">
@@ -222,10 +201,15 @@
     </div>
 </div>
 @include('includes.footer')
-
 </body>
 <script type="text/javascript">
+
     $(document).ready(function() {
+        $("#insertModal").modal("hide");
+        $("#insertBtn").click(function() {
+        $("#insertModal").modal("show");
+    });
+       
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -241,42 +225,26 @@
         dom: 'Blfrtip',
         buttons: [
             {
-                text: 'Word',
-                action: function ( e, dt, node, config ) {
-                    window.location.href='/events-word';
-                }
-             },
-        // {
-        //     extend: 'excel',
-        //     exportOptions: {
-        //         columns: ':visible'
-        //     }
-        // },
-        // {
-        //     extend: 'print',
-        //     exportOptions: {
-        //         columns: ':visible'
-        //     }
-        // },
-        // {
-        //     extend: 'pdf',
-        //     exportOptions: {
-        //         columns: ':visible'
-        //     }
-        // },
-        // {
-        //     extend: 'copy',
-        //     exportOptions: {
-        //         columns: ':visible'
-        //     }
-        // },
-        // {
-        //     extend: 'csv',
-        //     exportOptions: {
-        //         columns: ':visible'
-        //     }
-        // },
-        // 'colvis'
+            text: 'Word',
+            action: function ( e, dt, node, config ) {
+                var searchValue = $('.dataTables_filter input').val();
+                window.location.href='/events-word?search=' + searchValue;
+            }
+        },
+        {
+            text: 'Excel',
+            action: function ( e, dt, node, config ) {
+                var searchValue = $('.dataTables_filter input').val();
+                window.location.href = '/events-excel?search=' + searchValue;
+            }
+        },
+        {
+            text: 'PDF',
+            action: function ( e, dt, node, config ) {
+                var searchValue = $('.dataTables_filter input').val();
+                window.location.href = '/events-pdf?search=' + searchValue;
+            }
+        }
     ],
     columnDefs: [
         {
@@ -329,9 +297,17 @@
                     $('#form_result').html(html);
                 }
                 , error: function(data) {
-                    var errors = data.responseJSON;
-                    console.log(errors);
-                }
+                        var errors = data.responseJSON.errors;
+                        var html = '<span class="text-danger">';
+                        $.each(errors, function(key, value) {
+                        $('#' + key + '_error').html(html + value + '</span>');
+                        $('#' + key).on('input', function() {
+                        if ($(this).val().trim() !== '') {
+                            $('#' + key + '_error').empty();
+                        }
+                        });
+                    });
+                    }
             });
         });
         $('#insert_form').on('submit', function(event) {
@@ -365,11 +341,22 @@
                     $('#form_result').html(html);
                 }
                 , error: function(data) {
-                    var errors = data.responseJSON;
-                    console.log(errors);
+                    var errors = data.responseJSON.errors;
+                        var html = '<span class="text-danger">';
+                        $.each(errors, function(key, value) {
+                        $('#' + key + '_error').html(html + value + '</span>');
+                        $('#' + key).on('input', function() {
+                        if ($(this).val().trim() !== '') {
+                            $('#' + key + '_error').empty();
+                        }
+                        });
+                    });
                 }
             });
         });
+        //ADD----------------------------//
+
+        //ADD----------------------------//
         //EDIT---------------------------//
         $(document).on('click', '.edit', function(event) {
             event.preventDefault();
@@ -421,6 +408,13 @@
             })
         });
         //DELETE---------------------------//
+        document.addEventListener("DOMContentLoaded", function() {
+    var btn = document.getElementById("insertBtn");
+    btn.addEventListener("click", function() {
+        var insertModal = new bootstrap.Modal(document.getElementById("insertModal"));
+        insertModal.show();
+    });
+});
     });
 
 </script>

@@ -1,22 +1,26 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use App\Models\Drivers;
 use App\Models\Offices;
 use App\Models\Events;
+use App\Models\Vehicles;
 use App\Models\Reservations;
 use App\Models\Requestors;
-use Illuminate\Http\Request;
-use Carbon\Carbon;
 use Yajra\DataTables\DataTables; 
-use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpWord\TemplateProcessor; 
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\Reader\Word2007;
+use Carbon\Carbon;
+use PhpOffice\PhpWord\Settings;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpWord\PhpWord;
-use PhpOffice\PhpWord\Reader\Word2007;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class ReservationsController extends Controller
 {
@@ -29,13 +33,6 @@ class ReservationsController extends Controller
                 ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id');
             return Datatables::of($data)
                 ->addIndexColumn()
-                ->addColumn('rs_daily_transport', function ($data) {
-                    if( $data->rs_daily_transport == 1){
-                       return $data->rs_daily_transport = 'Daily Transport';
-                    }else{
-                        return $data->rs_daily_transport = 'Outside Province Transport';
-                    };
-                })
                 ->addColumn('created_at', function ($data) {
                     return $data->created_at->format('F j, Y');
                 })
@@ -57,6 +54,23 @@ class ReservationsController extends Controller
     }
     public function store(Request $request){
         $reservations = new Reservations();
+        $validation = $request->validate([
+            "rs_voucher"=>"required",
+            "rs_travel_type"=>"required",
+            "rs_approval_status"=>"required",
+            "rs_status"=>"required",
+            "event_id"=>"required",
+            "driver_id"=>"required",
+            "vehicle_id"=>"required",
+            "requestor_id"=>"required",
+
+        ],
+        [
+            "required"=>"This field is required",
+
+        ]
+    );
+        
         $reservations->reservation_id = $request->reservation_id;
         $reservations->rs_voucher = $request->rs_voucher;
         $reservations->rs_travel_type = $request->rs_travel_type;
@@ -79,8 +93,7 @@ class ReservationsController extends Controller
         $reservations->vehicle_id = $request->vehicle_edit;
         $reservations->requestor_id = $request->requestor_edit;
         $reservations->rs_voucher = $request->voucher_edit;
-        $reservations->rs_daily_transport = $request->travel_edit;
-        $reservations->rs_outside_province = $request->travel_edit;
+        $reservations->rs_travel_type = $request->travel_edit;
         $reservations->rs_approval_status = $request->approval_status_edit;
         $reservations->rs_status = $request->status_edit;
         $reservations->save();
@@ -101,6 +114,11 @@ class ReservationsController extends Controller
             return response()->json(['result' => $data]);
         }
     }
+    public function delete($reservation_id){
+        $data = Reservations::findOrFail($reservation_id);
+        $data->delete();
+        return response()->json(['success' => 'Vehicle successfully Deleted']);
+    }
     
     public function reservations_word(Request $request){
 
@@ -109,27 +127,41 @@ class ReservationsController extends Controller
             ->join('events', 'reservations.event_id', '=', 'events.event_id')
             ->join('drivers', 'reservations.driver_id', '=', 'drivers.driver_id')
             ->join('vehicles', 'reservations.vehicle_id', '=', 'vehicles.vehicle_id')
-            ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id')
-            ->get();
-    
-        $templateProcessor = new TemplateProcessor(public_path().'\\'."Reservations.docx");
-    
-        $rows = $reservations->count();
+            ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id');
+            
+            if ($request->has('search')) {
+                $searchValue = $request->input('search');
+                $reservations->where(function ($query) use ($searchValue) {
+                    $query->where('ev_name', 'like', '%' . $searchValue . '%')
+                        ->orWhere('dr_name', 'like', '%' . $searchValue . '%')
+                        ->orWhere('vh_brand', 'like', '%' . $searchValue . '%')
+                        ->orWhere('rq_full_name', 'like', '%' . $searchValue . '%')
+                        ->orWhere('rs_voucher', 'like', '%' . $searchValue . '%')
+                        ->orWhere('rs_approval_status', 'like', '%' . $searchValue . '%')
+                        ->orWhere('rs_status', 'like', '%' . $searchValue . '%')
+                        ->orWhere('rs_travel_type', 'like', '%' . $searchValue . '%');
+                });
+            }
+            $filteredReservations = $reservations->get();
+            $rows = $filteredReservations->count();
+
+            $templateProcessor = new TemplateProcessor(public_path().'\\'."Reservations.docx");
     
         $templateProcessor->cloneRow('reservation_id', $rows);
-        foreach($reservations as $index => $reservation){
-            $templateProcessor->setValue("reservation_id#".($index+1), $reservation->reservation_id);
-            $templateProcessor->setValue("event_id#".($index+1), $reservation->ev_name);
-            $templateProcessor->setValue("driver_id#".($index+1), $reservation->dr_name);
-            $templateProcessor->setValue("vehicle_id#".($index+1), $reservation->vh_brand .'-'. $reservation->vh_plate);
-            $templateProcessor->setValue("requestor_id#".($index+1), $reservation->rq_full_name);
-            $templateProcessor->setValue("rs_voucher#".($index+1), $reservation->rs_voucher);
-            $templateProcessor->setValue("rs_travel_type#".($index+1), $reservation->rs_travel_type);
-            $templateProcessor->setValue("created_at#".($index+1), $reservation->created_at);
-            $templateProcessor->setValue("rs_approval_status#".($index+1), $reservation->rs_approval_status);
-            $templateProcessor->setValue("rs_status#".($index+1), $reservation->rs_status);
-           
-            
+
+        for($i=0;$i<$rows;$i++){
+            $reservation=$filteredReservations[$i];
+            $formattedDate = Carbon::parse($reservation->created_at)->format('F j, Y');
+            $templateProcessor->setValue("reservation_id#".($i+1), $reservation->reservation_id);
+            $templateProcessor->setValue("event_id#".($i+1), $reservation->ev_name);
+            $templateProcessor->setValue("driver_id#".($i+1), $reservation->dr_name);
+            $templateProcessor->setValue("vehicle_id#".($i+1), $reservation->vh_brand);
+            $templateProcessor->setValue("requestor_id#".($i+1),  $reservation->rq_full_name);
+            $templateProcessor->setValue("rs_voucher#".($i+1), $reservation->rs_voucher);
+            $templateProcessor->setValue("rs_travel_type#".($i+1), $reservation->rs_travel_type);
+            $templateProcessor->setValue("created_at#".($i+1), $formattedDate);
+            $templateProcessor->setValue("rs_approval_status#".($i+1), $reservation->rs_approval_status);
+            $templateProcessor->setValue("rs_status#".($i+1), $reservation->rs_status);
         }
     
         $templateProcessor->saveAs(public_path().'\\'."WordDownloads\sample_downloads.docx");
@@ -238,22 +270,27 @@ class ReservationsController extends Controller
             $templateProcessor->setValue("rs_status#" . ($index + 1), $reservation->rs_status);
         }
     
-        // Save the modified template
-        $templateProcessor->saveAs(public_path('PdfDownloads/sample_downloads.docx'));
+        $wordFilePath = public_path().'\\'."WordDownloads\\reservations_list.docx";
+        $pdfFilePath = public_path().'\\'."PdfDownloads\\reservations_list.pdf";
     
-        // Load the modified template
-        $reader = new Word2007();
-        $content = $reader->load(public_path('PdfDownloads/sample_downloads.docx'));
-    
-        // Create PDF writer
-        $pdfWriter = IOFactory::createWriter($content, 'PDF');
+        $templateProcessor->saveAs($wordFilePath);
+
+         // Load Word document
+         $phpWord = \PhpOffice\PhpWord\IOFactory::load($wordFilePath); 
+           
+       // Set up Dompdf renderer
+       Settings::setPdfRendererPath(base_path('vendor/dompdf/dompdf'));
+       Settings::setPdfRendererName('DomPDF');
     
         // Save PDF file
-        $pdfFileName = "ReservationsList.pdf";
-        $pdfWriter->save(public_path('uploads/' . $pdfFileName));
-    
+        $pdfWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'PDF');
+        $pdfWriter->save($pdfFilePath);
+     
+        // Delete the Word file
+        unlink($wordFilePath);
+
         // Return response for PDF download
-        return response()->download(public_path('uploads/' . $pdfFileName))->deleteFileAfterSend(true);
+         return response()->download($pdfFilePath, "ReservationsList.pdf")->deleteFileAfterSend(true);
     }
 }
     
