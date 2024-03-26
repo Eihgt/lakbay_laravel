@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('drivers', function (Blueprint $table) {
             $table->id('driver_id');
             $table->integer('dr_emp_id');
-            $table->string('dr_name');
+            $table->string('dr_fname');
+            $table->string('dr_mname');
+            $table->string('dr_lname');
             $table->unsignedBigInteger('off_id');
             $table->foreign('off_id')->references('off_id')->on('offices');
             $table->string('dr_status');

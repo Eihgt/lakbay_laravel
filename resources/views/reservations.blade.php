@@ -49,7 +49,7 @@
                                                     <select class="form-select" name="driver_id" id="driver_id">
                                                         <option value=""disabled selected>Select driver</option>
                                                         @foreach ($drivers as $driver)
-                                                        <option value="{{$driver->driver_id}}">{{ $driver->dr_name }}</option>
+                                                        <option value="{{$driver->driver_id}}">{{ $driver->dr_fname }}</option>
                                                         @endforeach
                                                     </select>
                                                     <span id="driver_id_error"></span>
@@ -60,15 +60,22 @@
                                             <div class="col">
                                                 <div class="mb-2">
                                                     <label for="vehicle_id" class="form-label mb-0">Vehicle</label>
-                                                    <select class="form-select" name="vehicle_id" id="vehicle_id">
-                                                        <option value=""disabled selected>Select Vehicle</option>
+                                                    <select class="form-select vehicles-select" name="vehicle_id[]" id="vehicle_id" multiple="multiple">
+                                                        <option value="">ASKDJASKLD</option>
+                                                        <option value="">ASKDJASKLD</option>
+                                                        <option value="">ASKDJASKLD</option>
+                                                        <option value="">ASKDJASKLD</option>
+                                                        {{-- <option value=""disabled selected>Select Vehicle</option>
                                                         @foreach ($vehicles as $vehicle)
-                                                        <option value="{{ $vehicle->vehicle_id }}">{{ $vehicle->vh_brand }}-{{ $vehicle->vh_plate }}</option>
-                                                        @endforeach
+                                                        <option value="{{ $vehicle->vehicle_id }}">{{ $vehicle->vh_brand }}-{{ $vehicle->vh_plate }}-{{$vehicle->vh_capacity}}</option>
+                                                        @endforeach --}}
+
                                                     </select>
                                                     <span id="vehicle_id_error"></span>
                                                 </div>
                                             </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="col">
                                                 <div class="mb-2">
                                                     <label for="requestor_id" class="form-label mb-0">Requestor</label>
@@ -191,7 +198,7 @@
                         <label>Driver : </label>
                         <select class="form-select" name="driver_edit" id="driver_edit">
                             @foreach ($drivers as $driver)
-                            <option value="{{$driver->driver_id}}">{{ $driver->dr_name }}</option>
+                            <option value="{{$driver->driver_id}}">{{ $driver->dr_fname }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -199,7 +206,7 @@
                         <label>Vehicle</label>
                         <select class="form-select" name="vehicle_edit" id="vehicle_edit">
                             @foreach ($vehicles as $vehicle)
-                            <option value="{{ $vehicle->vehicle_id }}">{{ $vehicle->vh_brand }}-{{ $vehicle->vh_plate }}</option>
+                            <option value="{{ $vehicle->vehicle_id }}">{{ $vehicle->vh_brand }}-{{ $vehicle->vh_plate }}-{{$vehicle->vh_capacity}}</option>
                             @endforeach
                         </select>
                     </div>
@@ -272,6 +279,7 @@
 </body>
 <script type="text/javascript">
     $(document).ready(function() {
+        $('.vehicles-select').select2();
         $("#insertModal").modal("hide");
         $("#insertBtn").click(function() {
         $("#insertModal").modal("show");
@@ -306,13 +314,20 @@
                 var searchValue = $('.dataTables_filter input').val();
                 window.location.href = '/reservations-pdf?search=' + searchValue;
             }
+        },
+        {
+            text: 'Archive',
+            action: function ( e, dt, node, config ) {
+                var searchValue = $('.dataTables_filter input').val();
+                window.location.href='/reservations-archive';
+            }
         }
     ],
     ajax: "{{ route('reservations.show') }}",
     columns: [
         {data: 'reservation_id', name: 'reservation_id'},
         {data: 'ev_name', name: 'events.ev_name'},
-        {data: 'dr_name', name: 'drivers.dr_name'},
+        {data: 'dr_fname', name: 'drivers.dr_fname'},
         {data: 'vh_brand', name: 'vehicles.vh_brand'},
         {data: 'rq_full_name', name: 'requestors.rq_full_name'},
         {data: 'rs_voucher', name: 'rs_voucher'},
@@ -340,7 +355,7 @@
                 , data: $(this).serialize()
                 , dataType: 'json'
                 , success: function(data) {
-                    console.log('success: ' + data);
+                    console.log('custom: ' + data);
                     var html = '';
                     if (data.success) {
                         html = "<div class='alert alert-info alert-dismissible fade show py-1 px-4 d-flex justify-content-between align-items-center' role='alert'><span>&#8505; &nbsp;" + data.success + "</span><button type='button' class='btn fs-4 py-0 px-0' data-bs-dismiss='alert' aria-label='Close'>&times;</button></div>";
@@ -354,6 +369,7 @@
                 var errors = data.responseJSON.errors;
                 var html = '<span class="text-danger">';
                 $.each(errors, function(key, value) {
+                    // console.log(key);
                     $('#' + key + '_error').html(html + value + '</span>');
                     $('#' + key).on('input', function() {
                         if ($(this).val().trim() !== '') {

@@ -22,6 +22,7 @@ class ReservationsFactory extends Factory
     {
         return [
             'rs_voucher' => fake()->randomNumber(),
+            'rs_passengers' => fake()->numberBetween(1,20),
             'rs_travel_type'=> fake()->randomElement(['Daily Travel', 'Outside Province']),
             'rs_approval_status' => fake()->randomElement(['Pending', 'Approved', 'Rejected']),
             'rs_status' => fake()->randomElement(['Active', 'Inactive','Cancelled']),

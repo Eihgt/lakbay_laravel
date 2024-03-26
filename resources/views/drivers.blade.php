@@ -248,7 +248,7 @@
     ajax: "{{ route('drivers.show') }}",
     columns: [
     {data: 'dr_emp_id', name: 'dr_emp_id'},
-    {data: 'dr_name', name: 'dr_name'},
+    {data: 'dr_fname', name: 'dr_fname'},
     {data: 'off_name', name: 'offices.off_name'},
     {data: 'dr_status', name: 'dr_status'},
     {data: 'action', name: 'action', orderable: false, searchable: false},
@@ -314,7 +314,7 @@ $('#drivers-form').on('submit', function(event) {
              {
             //  alert(data.result.dr_emp_id);
              $('#dr_emp_id_modal').val(data.result.dr_emp_id);
-             $('#dr_name_modal').val(data.result.dr_name);
+             $('#dr_name_modal').val(data.result.dr_fname);
              $('#off_text').text(data.result.off_acr);
              $('#off_text').val(data.result.off_id);
              $('#dr_status_modal').val(data.result.dr_status);

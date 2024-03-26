@@ -83,6 +83,7 @@ Route::get('/offices-pdf', [OfficesController::class, 'offices_pdf']);
 //End
 //Reservation Section
 Route::get('/reservations', [ReservationsController::class,'show'])->name('reservations.show');
+Route::get('/reservations-archive', [ReservationsController::class, 'reservations_archive']);
 Route::get('/reservations-word', [ReservationsController::class, 'reservations_word']);
 Route::get('/reservations-excel', [ReservationsController::class, 'reservations_excel']);
 Route::get('/reservations-pdf', [ReservationsController::class, 'reservations_pdf']);

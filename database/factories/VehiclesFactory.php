@@ -19,6 +19,7 @@ class VehiclesFactory extends Factory
         return [
             // "vehicle_id" => fake()->unique()->randomNumber(5, true),
         "vh_type" => fake()->unique()->randomNumber(5, true),
+        "vh_capacity"=>fake()->numberBetween(1,20),
         "vh_plate" => fake()->name(),
         "vh_brand" => fake()->name(),
         "vh_year" => 2020,

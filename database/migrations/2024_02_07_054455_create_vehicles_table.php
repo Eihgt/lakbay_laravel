@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('vh_type');
             $table->string('vh_brand')->nullable();
             $table->integer('vh_year');
+            $table->integer('vh_capacity');
             $table->string('vh_fuel_type')->nullable();
             $table->string('vh_condition');
             $table->string('vh_status');

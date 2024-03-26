@@ -19,7 +19,9 @@ class DriversFactory extends Factory
         return [
             // "driver_id" => fake()->unique()->randomNumber(4, true),
             "dr_emp_id" => fake()->unique()->randomNumber(8, true),
-            "dr_name" => fake()->name(),
+            "dr_fname" =>  fake()->firstName(),
+            "dr_mname" => fake()->lastName(),
+            "dr_lname" => fake()->lastName(),
             "off_id" => fake()->numberBetween(1,10),
             "dr_status" => fake()->randomElement(['On Travel', 'Busy','Idle']),
         ];

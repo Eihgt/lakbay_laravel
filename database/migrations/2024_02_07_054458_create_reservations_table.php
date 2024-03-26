@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('reservations', function (Blueprint $table) {
             $table->id('reservation_id');
             $table->bigInteger('rs_voucher');
-            $table->string('rs_travel_type', 20)->nullable();
+            $table->bigInteger('rs_passengers');
+            $table->string('rs_travel_type', 255)->nullable();
             $table->string('rs_approval_status', 20)->nullable();
             $table->string('rs_status', 20)->nullable();
             $table->unsignedBigInteger('event_id');
