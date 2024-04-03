@@ -26,11 +26,14 @@ use Dompdf\Options;
 class ReservationsController extends Controller
 {
     public function show(Request $request){
+
+        // $data = Reservations::with("reservation_vehicles","reservation_vehicles.vehicles")->get();
+        // dd($data[0]);
+        
+
         if ($request->ajax()) {
-            $data = Reservations::select('reservations.*','drivers.dr_fname','events.ev_name','vehicles.vh_brand','requestors.rq_full_name')
-                ->join('drivers', 'reservations.driver_id', '=', 'drivers.driver_id')
+            $data = Reservations::with("reservation_vehicles","reservation_vehicles.vehicles","reservation_vehicles.drivers")->select('reservations.*','events.ev_name','requestors.rq_full_name')
                 ->join('events', 'reservations.event_id', '=', 'events.event_id')
-                ->join('vehicles', 'reservations.vehicle_id', '=', 'vehicles.vehicle_id')
                 ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id');
             return Datatables::of($data)
                 ->addIndexColumn()
@@ -45,6 +48,7 @@ class ReservationsController extends Controller
                 ->rawColumns(['action'])
                 ->make(true);
         }
+        
         $events = DB::table('events')->select('ev_name','event_id')->get();
         $drivers = DB::table('drivers')->select('driver_id','dr_fname')->get();
         $vehicles = DB::table('vehicles')->select('vehicle_id','vh_plate','vh_brand','vh_capacity')->get();
@@ -56,18 +60,7 @@ class ReservationsController extends Controller
     public function store(Request $request){
         $reservations = new Reservations();
         $reservation_vh = new ReservationVehicle();
-
         
-        //    $errors = ["message"=> "This field is required (and 7 more errors)",
-        //     "errors"=> [
-        //         "event_id"=> [
-        //             "This field is required"
-        //         ]
-        //         ]
-        //         ];
-        // return response()->json(
-        //     $errors,422
-        // );
         $validation = $request->validate([
             "rs_voucher"=>"required",
             "rs_travel_type"=>"required",
@@ -77,60 +70,93 @@ class ReservationsController extends Controller
             "driver_id"=>"required",
             "vehicle_id"=>"required",
             "requestor_id"=>"required",
-
+            "rs_passengers"=>"required",
         ],
         [
             "required"=>"This field is required",
+        ]);
 
-        ]
-        
-    );
         $reservations->rs_voucher = $request->rs_voucher;
         $reservations->rs_travel_type = $request->rs_travel_type;
         $reservations->rs_approval_status = $request->rs_approval_status;
         $reservations->rs_status = $request->rs_status;
         $reservations->event_id = $request->event_id;
-        $reservations->driver_id = $request->driver_id;
-        $reservations->vehicle_id = $request->vehicle_id;
         $reservations->requestor_id = $request->requestor_id;
+        $reservations->rs_passengers = $request->rs_passengers;
         $reservations->save();
-        $reservation_vh->reservation_id = $reservations->reservation_id;
-        $reservation_vh->driver_id = $request->driver_id;
-        $reservation_vh->vehicle_id = $request->vehicle_id;
-        $reservation_vh->save();
+        
+        
+        $vehicle_ids = $request->vehicle_id;
+        $driver_ids = $request->driver_id;
+        $count = count($vehicle_ids);
+        
+        for ($i = 0; $i < $count; $i++) {
+            $reservation_vh = new ReservationVehicle();
+            $reservation_vh->reservation_id = $reservations->reservation_id;
+            $reservation_vh->vehicle_id = $vehicle_ids[$i]; 
+            
+            // Check if driver_id is set before assigning
+            if (isset($driver_ids[$i])) {
+                $reservation_vh->driver_id = $driver_ids[$i];
+            }
+            
+            $reservation_vh->save();
+        }
+        
 
+            
+
+
+        
         return response()->json(['success' => 'Reservation successfully recorded']);
     }
+
+    
     public function update(Request $request)
     {    
         $id = $request->hidden_id;
+        // dd($id);
         $reservations = Reservations::findOrFail($id);
+        dd($reservations);
+        // $reservations->event_id = $request->event_edit;
+        // $reservations->requestor_id = $request->requestor_edit;
+        // $reservations->rs_voucher = $request->voucher_edit;
+        // $reservations->rs_travel_type = $request->travel_edit;
+        // $reservations->rs_approval_status = $request->approval_status_edit;
+        // $reservations->rs_status = $request->status_edit;
+        // $reservations->save();
 
-        $reservations->event_id = $request->event_edit;
-        $reservations->driver_id = $request->driver_edit;
-        $reservations->vehicle_id = $request->vehicle_edit;
-        $reservations->requestor_id = $request->requestor_edit;
-        $reservations->rs_voucher = $request->voucher_edit;
-        $reservations->rs_travel_type = $request->travel_edit;
-        $reservations->rs_approval_status = $request->approval_status_edit;
-        $reservations->rs_status = $request->status_edit;
-        $reservations->save();
+        // $vehicle_ids = $request->vehicle_id;
+        // $driver_ids = $request->driver_id;
+        // $count = count($vehicle_ids);
+        
+        // for ($i = 0; $i < $count; $i++){
+        //     $reservation_vh->reservation_id = $reservations->reservation_id;
+        //     $reservation_vh->vehicle_id = $vehicle_ids[$i]; 
+        //     // Check if driver_id is set before assigning
+        //     if (isset($driver_ids[$i])) {
+        //         $reservation_vh->driver_id = $driver_ids[$i];
+        //     }
+            
+        //     $reservation_vh->save();
+        // }
 
-        return response()->json(['success' => 'Reservation successfully updated']);
+
+
+        // return response()->json(['success' => 'Reservation successfully updated']);
     }
     public function edit($reservation_id)   
     {   
         if (request()->ajax()) {
-            $data = Reservations::select('reservations.*', 'events.ev_name', 'drivers.dr_fname', 'vehicles.vh_brand', 'vehicles.vh_plate', 'requestors.rq_full_name')
+            $data = Reservations::with("reservation_vehicles","reservation_vehicles.vehicles","reservation_vehicles.drivers")->select('reservations.*', 'events.ev_name', 'requestors.rq_full_name')
                 ->join('events', 'reservations.event_id', '=', 'events.event_id')
-                ->join('drivers', 'reservations.driver_id', '=', 'drivers.driver_id')
-                ->join('vehicles', 'reservations.vehicle_id', '=', 'vehicles.vehicle_id')
                 ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id')
                 ->findOrFail($reservation_id);
                 
             
             return response()->json(['result' => $data]);
         }
+
     }
     public function delete($reservation_id){
         $data = Reservations::findOrFail($reservation_id);

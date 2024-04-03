@@ -19,12 +19,8 @@ return new class extends Migration
             $table->string('rs_approval_status', 20)->nullable();
             $table->string('rs_status', 20)->nullable();
             $table->unsignedBigInteger('event_id');
-            $table->unsignedBigInteger('driver_id');
-            $table->unsignedBigInteger('vehicle_id');
             $table->unsignedBigInteger('requestor_id');
             $table->foreign('event_id')->references('event_id')->on('events');
-            $table->foreign('driver_id')->references('driver_id')->on('drivers');
-            $table->foreign('vehicle_id')->references('vehicle_id')->on('vehicles');
             $table->foreign('requestor_id')->references('requestor_id')->on('requestors');
             $table->timestamps();
         });

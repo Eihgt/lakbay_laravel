@@ -17,9 +17,9 @@ class ReservationVehicleFactory extends Factory
     public function definition(): array
     {
         return [
-            'reservation_id' => fake()->numberBetween(1,10), 
-            'driver_id' => fake()->numberBetween(1,10), 
-            'vehicle_id' => fake()->numberBetween(1,10), 
+            'reservation_id' => fake()->numberBetween(1,50), 
+            'driver_id' => fake()->numberBetween(1,50), 
+            'vehicle_id' => fake()->numberBetween(1,50), 
         ];
     }
 }

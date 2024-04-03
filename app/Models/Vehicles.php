@@ -6,6 +6,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Events;
+use App\Models\Drivers;
+use App\Models\Requestors;
+use App\Models\Vehicles;
+use App\Models\ReservationVehicle;
+
 
 class Vehicles extends Model
 {
@@ -25,5 +31,10 @@ class Vehicles extends Model
     {
         return $this->hasMany(Reservations::class,'vehicle_id');
     }
+    public function reservation_vehicle(): HasMany
+    {
+        return $this->hasMany(ReservationVehicle::class,'vehicle_id');
+    }
+    
 
 }
