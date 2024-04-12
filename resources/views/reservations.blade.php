@@ -198,7 +198,7 @@
                     </div>
                     <div class="form-group">
                         <label>Driver : </label>
-                        <select class="form-select driver_edit" name="driver_edit" id="driver_edit" multiple>
+                        <select class="form-select driver_edit" name="driver_edit[]" id="driver_edit" multiple>
                             @foreach ($drivers as $driver)
                             <option value="{{$driver->driver_id}}">{{ $driver->dr_fname }}</option>
                             @endforeach
@@ -248,7 +248,7 @@
                           </select>
                     </div>
                     <input type="hidden" name="action" id="action" value="Add" />
-
+                    <input type="hidden" name="hidden_id" id="hidden_id" value="" />
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -268,7 +268,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <h4 align="center" style="margin:0;">Are you sure you want to remove this data?</h4>
+                    <h4 id="confirm_message" align="center" style="margin:0;">Are you sure you want to remove this data?</h4>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -344,9 +344,11 @@
     {data: 'reservation_vehicles',
         render: function(data,type,row,meta){
             var drivers=[];
-
             data.forEach((item, index)=>{
-            drivers.push(item.drivers.dr_fname)          
+            if(item.drivers !=null){
+                drivers.push(item.drivers.dr_fname) 
+            }
+                     
             })
             return drivers.join(",").toString();
         }
@@ -491,10 +493,32 @@
                     });
                 });
         //UPDATE------------------------------------------//
+        //CANCEL----------------------------------------------//
+        var reservation_id;
+        $(document).on('click', '.cancel', function() {
+            reservation_id = $(this).attr('id');
+            $('#confirm_message').text("Are You sure you want to Cancel?");
+            $('#confirmModal').modal('show');
+        });
+
+        $('#ok_button').click(function() {
+            $.ajax({
+                url: "/cancel-reservation/" + reservation_id
+                , success: function(data) {
+                    setTimeout(function() {
+                        $('#confirmModal').modal('hide');
+                        $('#reservations-table').DataTable().ajax.reload();
+                    });
+                }
+            })
+        });
+
+        //CANCEL-----------------------------------------------//
         // DELETE---------------------------//
         var reservation_id;
         $(document).on('click', '.delete', function() {
             reservation_id = $(this).attr('id');
+            $('#confirm_message').text("Are You sure you want to Delete?");
             $('#confirmModal').modal('show');
         });
 
@@ -523,7 +547,6 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 @include('includes.footer');
 </html>
-
 
 
 

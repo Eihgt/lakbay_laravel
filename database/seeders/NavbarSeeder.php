@@ -44,6 +44,7 @@ class NavbarSeeder extends Seeder
                 'route' => 'requestors',
                 'ordering' => 6,
             ]
+            
         ];
 
         foreach ($links as $key => $navbar) {

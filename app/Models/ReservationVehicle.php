@@ -15,7 +15,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ReservationVehicle extends Model
 {
     use HasFactory;
-    
+    protected $fillable=[
+        'vehicle_id',
+        'reservation_id',
+        'driver_id'
+    ];
     // public function reservation(): BelongsTo
     // {
     //     return $this->belongsTo(Reservation::class, 'reservation_id');

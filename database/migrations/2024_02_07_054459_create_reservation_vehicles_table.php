@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('reservation_vehicles', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('reservation_id');
-            $table->unsignedBigInteger('driver_id');
+            $table->unsignedBigInteger('driver_id')->nullable();;
             $table->unsignedBigInteger('vehicle_id');
             $table->foreign('reservation_id')->references('reservation_id')->on('reservations');
             $table->foreign('driver_id')->references('driver_id')->on('drivers');

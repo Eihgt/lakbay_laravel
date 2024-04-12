@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('rs_travel_type', 255)->nullable();
             $table->string('rs_approval_status', 20)->nullable();
             $table->string('rs_status', 20)->nullable();
-            $table->unsignedBigInteger('event_id');
+            $table->unsignedBigInteger('event_id')->unique();
             $table->unsignedBigInteger('requestor_id');
             $table->foreign('event_id')->references('event_id')->on('events');
             $table->foreign('requestor_id')->references('requestor_id')->on('requestors');

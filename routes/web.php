@@ -90,6 +90,7 @@ Route::get('/reservations-pdf', [ReservationsController::class, 'reservations_pd
 Route::post('/insert-reservation', [ReservationsController::class, 'store']);
 Route::post('/update-reservation', [ReservationsController::class, 'update']);
 Route::get('/edit-reservation/{reservation_id}', [ReservationsController::class, 'edit']);
+Route::get('/cancel-reservation/{reservation_id}', [ReservationsController::class, 'cancel']);
 Route::get('/delete-reservation/{reservation_id}', [ReservationsController::class, 'delete']);
 //End
 
