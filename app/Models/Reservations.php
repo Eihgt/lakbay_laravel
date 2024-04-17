@@ -21,8 +21,10 @@ class Reservations extends Model
     protected $fillable=[
         'rs_voucher',
         'rs_daily_transport',
+        'rs_cancelled',
         'rs_outside_province',
         'rs_date_filed',
+        'rs_passengers',
         'rs_approval_status',
         'rs_status',
         'event_id',

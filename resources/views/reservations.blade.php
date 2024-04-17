@@ -272,7 +272,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" name="ok_button" id="ok_button" class="btn btn-danger">OK</button>
+                    <button type="button" action="" name="ok_button" id="ok_button" class="btn btn-danger">OK</button>
                 </div>
             </form>
         </div>
@@ -499,9 +499,25 @@
             reservation_id = $(this).attr('id');
             $('#confirm_message').text("Are You sure you want to Cancel?");
             $('#confirmModal').modal('show');
+            $('#ok_button').prop('action','cancelled')
+        });
+
+
+
+        //CANCEL-----------------------------------------------//
+        // DELETE---------------------------//
+        var reservation_id;
+        $(document).on('click', '.delete', function() {
+            reservation_id = $(this).attr('id');
+            $('#confirm_message').text("Are You sure you want to Delete?");
+            $('#confirmModal').modal('show');
+            $('#ok_button').prop('action','delete')
         });
 
         $('#ok_button').click(function() {
+        var action = $(this).prop('action');
+        if(action=='cancelled')
+            {
             $.ajax({
                 url: "/cancel-reservation/" + reservation_id
                 , success: function(data) {
@@ -511,19 +527,8 @@
                     });
                 }
             })
-        });
-
-        //CANCEL-----------------------------------------------//
-        // DELETE---------------------------//
-        var reservation_id;
-        $(document).on('click', '.delete', function() {
-            reservation_id = $(this).attr('id');
-            $('#confirm_message').text("Are You sure you want to Delete?");
-            $('#confirmModal').modal('show');
-        });
-
-        $('#ok_button').click(function() {
-            $.ajax({
+            }else{
+                $.ajax({
                 url: "/delete-reservation/" + reservation_id
                 , success: function(data) {
                     setTimeout(function() {
@@ -532,6 +537,9 @@
                     });
                 }
             })
+            }
+
+
         });
         //DELETE---------------------------//
 document.addEventListener("DOMContentLoaded", function() {

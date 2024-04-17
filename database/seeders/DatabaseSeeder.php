@@ -8,7 +8,7 @@ use Illuminate\Database\Seeder;
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
+     * Seed the appli`cation's database.
      */
     public function run(): void
 
@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         \App\Models\Vehicles::factory(50)->create();
         \App\Models\Events::factory(50)->create();
         \App\Models\Requestors::factory(50)->create();
-        \App\Models\Reservations::factory(30)->create();
+        \App\Models\Reservations::factory(50)->create();
         \App\Models\ReservationVehicle::factory(50)->create();
         \App\Models\User::factory()->create([
             'name' => 'Test User',

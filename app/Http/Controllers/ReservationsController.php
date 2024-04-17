@@ -26,7 +26,6 @@ use Dompdf\Options;
 class ReservationsController extends Controller
 {
     public function show(Request $request){
-
         if ($request->ajax()) {
             $data = Reservations::with("reservation_vehicles","reservation_vehicles.vehicles","reservation_vehicles.drivers")->select('reservations.*','events.ev_name','requestors.rq_full_name')
                 ->join('events', 'reservations.event_id', '=', 'events.event_id')
@@ -60,15 +59,13 @@ class ReservationsController extends Controller
                     ->select('vehicle_id', 'vh_plate', 'vh_brand', 'vh_capacity')
                     ->get();
 
-        $events = DB::table('events')->select('event_id','ev_name', 'event_id','ev_date_start','ev_date_end')->get();
-        $existingEventIds = Reservations::distinct('event_id')->pluck('event_id')->toArray();
-        $events = Events::whereNotIn('event_id', function ($query) {
-            $query->select('event_id')
-                  ->from('reservations')
-                  ->where('rs_status', '=', 'Cancelled');
-        })
-        ->get();
-
+        // $events = DB::table('events')->select('event_id','ev_name', 'event_id','ev_date_start','ev_date_end')->get();
+        // $existingEventIds = Reservations::distinct('event_id')->pluck('event_id')->toArray();
+    
+        $events = Events::leftJoin('reservations','events.event_id','reservations.event_id')
+        ->whereNull('reservations.reservation_id')
+        ->orWhere([['reservations.rs_status','Cancelled'],['rs_cancelled',0]])
+        ->orderBy('ev_name')->get();
         $requestors = DB::table('requestors')->select('requestor_id', 'rq_full_name')->get();
         return view('reservations')->with(compact('events', 'drivers', 'vehicles', 'requestors'));
     }
@@ -99,8 +96,15 @@ class ReservationsController extends Controller
         $reservations->event_id = $request->event_id;
         $reservations->requestor_id = $request->requestor_id;
         $reservations->rs_passengers = $request->rs_passengers;
+        $cancelled =  Reservations::where([['rs_cancelled',0],['event_id',$request->event_id]])->latest()->first();
+        // dd($cancelled);
+        if($cancelled){
+            $cancelled_reservation = Reservations::find($cancelled->reservation_id);
+            $cancelled_reservation->rs_cancelled = True;
+            $cancelled_reservation->save();
+        }
         $reservations->save();
-        
+
         
         $vehicle_ids = $request->vehicle_id;
         $driver_ids = $request->driver_id;
@@ -132,7 +136,18 @@ class ReservationsController extends Controller
         $reservations->rs_travel_type = $request->travel_edit;
         $reservations->rs_approval_status = $request->approval_status_edit;
         $reservations->rs_status = $request->status_edit;
+        $cancelled =  Reservations::where([['rs_cancelled',0],['event_id',$request->event_edit]])->latest()->first();
+        // dd($cancelled);
+        if($cancelled!=null){
+            $cancelled_reservation = Reservations::find($cancelled->reservation_id);
+            $cancelled_reservation->rs_cancelled = True;
+            $cancelled_reservation->save();
+            // dd($cancelled_reservation);
+        }
         $reservations->save();
+
+
+
         $reservation_id = $reservations->reservation_id;
         $vehicle_id_edit = $request->vehicle_edit;
         $driver_id_edit = $request->driver_edit;
@@ -189,7 +204,7 @@ class ReservationsController extends Controller
     }
     public function cancel($reservation_id){
         $reservation = Reservations::findOrFail($reservation_id);
-        $reservation->rs_status = "Cancelled";
+        $reservation->rs_status = 'Cancelled';
         $reservation->save();
         return response()->json(['success' => 'Reservation successfully Cancelled']);
     }
