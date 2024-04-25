@@ -8,7 +8,6 @@ use App\Models\Events;
 use App\Models\Drivers;
 use App\Models\Requestors;
 use App\Models\Vehicles;
-use App\Models\ReservationVehicle;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

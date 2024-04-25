@@ -23,10 +23,6 @@ use App\Http\Controllers\DataTableAjaxCRUDController;
 |
 */
 
-
-Route::get('/test', function () {
-    return view('test_word');
-});
 Route::get('/dashboard', function () {
     return view('dashboard');
 });
@@ -70,6 +66,7 @@ Route::get('/delete-event/{event_id}', [EventsController::class, 'delete']);
 Route::get('/events-word', [EventsController::class, 'events_word']);
 Route::get('/events-excel', [EventsController::class, 'events_excel']);
 Route::get('/events-pdf', [EventsController::class, 'events_pdf']);
+
 //End
 //Offices Section
 Route::get('/offices', [OfficesController::class, 'show'])->name('offices.show');
@@ -83,6 +80,8 @@ Route::get('/offices-pdf', [OfficesController::class, 'offices_pdf']);
 //End
 //Reservation Section
 Route::get('/reservations', [ReservationsController::class,'show'])->name('reservations.show');
+Route::get('/get-events', [ReservationsController::class,'events'])->name('reservations.getEvents');
+Route::get('/get-edit-events', [ReservationsController::class, 'events_edit'])->name('reservations.getEditEvents');
 Route::get('/reservations-archive', [ReservationsController::class, 'reservations_archive']);
 Route::get('/reservations-word', [ReservationsController::class, 'reservations_word']);
 Route::get('/reservations-excel', [ReservationsController::class, 'reservations_excel']);
@@ -92,7 +91,9 @@ Route::post('/update-reservation', [ReservationsController::class, 'update']);
 Route::get('/edit-reservation/{reservation_id}', [ReservationsController::class, 'edit']);
 Route::get('/cancel-reservation/{reservation_id}', [ReservationsController::class, 'cancel']);
 Route::get('/delete-reservation/{reservation_id}', [ReservationsController::class, 'delete']);
+// Route::get('/get-events', [ReservationsController::class, 'events']);
 //End
 
 //Test Section
-Route::get('/driver-word', [DriversController::class, 'driver_word']);
+Route::get('/test-select', [ReservationsController::class, 'test_select'])->name('reservations.testSelect');
+Route::get('/test-return', [ReservationsController::class, 'test_return'])->name('reservations.testReturn');

@@ -2,11 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-
-use Datatables;
-
+use App\Models\Drivers;
+use App\Models\Offices;
+use App\Models\Events;
+use App\Models\Vehicles;
+use App\Models\Reservations;
+use App\Models\ReservationVehicle;
 use App\Models\Requestors;
+use Yajra\DataTables\DataTables; 
+use PhpOffice\PhpWord\TemplateProcessor; 
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\Reader\Word2007;
+use Carbon\Carbon;
+use PhpOffice\PhpWord\Settings;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 
 class RequestorsController extends Controller
@@ -16,7 +32,6 @@ class RequestorsController extends Controller
      */
     public function index()
     {
-        //
         if(request()->ajax()) {
                         return datatables()->of(Requestors::select('*'))
                         ->addColumn('action', 'requestor.requestor-action')
@@ -24,7 +39,9 @@ class RequestorsController extends Controller
                         ->addIndexColumn()
                         ->make(true);
                     }
-                    return view('requestor.requestors');
+
+    $offices = Offices::select('offices.*')->get();
+                    return view('requestor.requestors')->with(compact('offices'));
             
     }
 
@@ -59,9 +76,7 @@ class RequestorsController extends Controller
        return Response()->json($requestor);
     }
 
-    /**
-     * Display the specified resource.
-     */
+    
     public function show(Request $request)
     {
       //

@@ -7,13 +7,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Offices;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Drivers extends Model
 {
     use HasFactory;
     use SoftDeletes;
     protected $primaryKey = 'driver_id';
-    protected $fillable=[
+    protected $fillable = [
         'driver_id',
         'dr_emp_id',
         'dr_name',
@@ -24,5 +25,4 @@ class Drivers extends Model
     {
         return $this->belongsTo(Offices::class, 'off_id');
     }
-
 }

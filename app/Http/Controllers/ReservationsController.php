@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -10,9 +11,10 @@ use App\Models\Events;
 use App\Models\Vehicles;
 use App\Models\Reservations;
 use App\Models\ReservationVehicle;
+
 use App\Models\Requestors;
-use Yajra\DataTables\DataTables; 
-use PhpOffice\PhpWord\TemplateProcessor; 
+use Yajra\DataTables\DataTables;
+use PhpOffice\PhpWord\TemplateProcessor;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\Reader\Word2007;
 use Carbon\Carbon;
@@ -25,9 +27,10 @@ use Dompdf\Options;
 
 class ReservationsController extends Controller
 {
-    public function show(Request $request){
+    public function show(Request $request)
+    {
         if ($request->ajax()) {
-            $data = Reservations::with("reservation_vehicles","reservation_vehicles.vehicles","reservation_vehicles.drivers")->select('reservations.*','events.ev_name','requestors.rq_full_name')
+            $data = Reservations::with("reservation_vehicles", "reservation_vehicles.vehicles", "reservation_vehicles.drivers")->select('reservations.*', 'events.ev_name', 'requestors.rq_full_name')
                 ->join('events', 'reservations.event_id', '=', 'events.event_id')
                 ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id');
             return Datatables::of($data)
@@ -36,9 +39,9 @@ class ReservationsController extends Controller
                     return $data->created_at->format('F j, Y');
                 })
                 ->addColumn('action', function ($data) {
-                    $button = '<button type="button" name="edit" id="'.$data->reservation_id.'" class="edit btn btn-primary btn-sm">Edit</button>';
-                    $button .= '<button type="button" name="delete" id="' . $data->reservation_id . '" class="delete btn btn-danger btn-sm">Delete</button>';
-                    $button .= '<button type="button" name="cancel" id="' . $data->reservation_id . '" class="cancel btn btn-danger btn-sm">Cancel</button>';
+                    $button = '<button type="button" name="edit" id="' . $data->reservation_id . '" class="edit btn btn-primary table-btn">Edit</button>';
+                    $button .= '<button type="button" name="cancel" id="' . $data->reservation_id . '" class="cancel btn btn-danger table-btn">Cancel</button>';
+                    $button .= '<button type="button" name="delete" id="' . $data->reservation_id . '" class="delete btn btn-danger table-btn">Delete</button>';
                     return $button;
                 })
                 ->rawColumns(['action'])
@@ -46,48 +49,121 @@ class ReservationsController extends Controller
         }
         $existingDriverIds = ReservationVehicle::whereNotNull('driver_id')->distinct('driver_id')->pluck('driver_id')->toArray();
         $existingVehicleIds = ReservationVehicle::pluck('vehicle_id')->toArray();
-        // dd($existingDriverIds);
 
         $drivers = DB::table('drivers')
-                    ->whereNotIn('driver_id', $existingDriverIds)
-                    ->select('driver_id', 'dr_fname')
-                    ->get();
+            ->whereNotIn('driver_id', $existingDriverIds)
+            ->select('driver_id', 'dr_fname')
+            ->get();
 
 
         $vehicles = DB::table('vehicles')
-                    ->whereNotIn('vehicle_id', $existingVehicleIds)
-                    ->select('vehicle_id', 'vh_plate', 'vh_brand', 'vh_capacity')
-                    ->get();
+            ->whereNotIn('vehicle_id', $existingVehicleIds)
+            ->select('vehicle_id', 'vh_plate', 'vh_brand', 'vh_capacity')
+            ->get();
 
         // $events = DB::table('events')->select('event_id','ev_name', 'event_id','ev_date_start','ev_date_end')->get();
         // $existingEventIds = Reservations::distinct('event_id')->pluck('event_id')->toArray();
-    
-        $events = Events::leftJoin('reservations','events.event_id','reservations.event_id')
-        ->whereNull('reservations.reservation_id')
-        ->orWhere([['reservations.rs_status','Cancelled'],['rs_cancelled',0]])
-        ->orderBy('ev_name')->get();
+
+        $events = Events::leftJoin('reservations', 'events.event_id', 'reservations.event_id')
+            ->whereNull('reservations.reservation_id')
+            ->orWhere([['reservations.rs_status', 'Cancelled'], ['rs_cancelled', 0]])
+            ->orderBy('ev_name')->get();
+
         $requestors = DB::table('requestors')->select('requestor_id', 'rq_full_name')->get();
+        // return view('reservations')->with(compact('drivers', 'vehicles', 'requestors'));
         return view('reservations')->with(compact('events', 'drivers', 'vehicles', 'requestors'));
     }
-    
-    public function store(Request $request){
+    public function events()
+    {
+        $eventsInsert = Events::leftJoin('reservations', 'events.event_id', 'reservations.event_id')
+            ->whereNull('reservations.reservation_id')
+            ->orWhere([
+                ['reservations.rs_status', 'Cancelled'],
+                ['rs_cancelled', 0]
+            ])
+            ->select('events.event_id', 'ev_name')
+            ->orderBy('ev_name')
+            ->get();
+
+        $existingDriverIds = ReservationVehicle::whereNotNull('driver_id')->distinct('driver_id')->pluck('driver_id')->toArray();
+        $existingVehicleIds = ReservationVehicle::pluck('vehicle_id')->toArray();
+        $driversInsert = DB::table('drivers')
+            ->whereNotIn('driver_id', $existingDriverIds)
+            ->select('driver_id', 'dr_fname')
+            ->get();
+
+        $vehiclesInsert = DB::table('vehicles')
+            ->whereNotIn('vehicle_id', $existingVehicleIds)
+            ->select('vehicle_id', 'vh_plate', 'vh_brand', 'vh_capacity')
+            ->get();
+        $requestorsInsert = DB::table('requestors')->select('requestor_id', 'rq_full_name')->get();
+
+        return response()->json($eventsInsert);
+    }
+
+    public function events_edit()
+    {
+        $eventsInsert = Events::leftJoin('reservations', 'events.event_id', 'reservations.event_id')
+            ->whereNull('reservations.reservation_id')
+            ->orWhere([
+                ['reservations.rs_status', 'Cancelled'],
+                ['rs_cancelled', 0]
+            ])
+            ->select('events.event_id', 'ev_name')
+            ->orderBy('ev_name')
+            ->get();
+
+        $existingDriverIds = ReservationVehicle::whereNotNull('driver_id')->distinct('driver_id')->pluck('driver_id')->toArray();
+        $existingVehicleIds = ReservationVehicle::pluck('vehicle_id')->toArray();
+
+        $driversInsert = DB::table('drivers')
+            ->leftJoin('reservation_vehicles', 'drivers.driver_id', 'reservation_vehicles.driver_id')
+            ->whereNull('reservation_vehicles.driver_id')
+            ->select('drivers.driver_id', 'dr_fname')
+            ->get();
+
+
+        $vehiclesInsert = DB::table('vehicles')
+            ->leftJoin('reservation_vehicles', 'vehicles.vehicle_id', 'reservation_vehicles.vehicle_id')
+            ->whereNull('reservation_vehicles.vehicle_id')
+            ->select('vehicles.vehicle_id', 'vh_capacity', 'vh_brand')
+            ->get();
+
+
+        $array = [
+            'events' => $eventsInsert,
+            'drivers' => $driversInsert,
+            'vehicles' => $vehiclesInsert
+        ];
+
+
+        return response()->json($array);
+    }
+
+
+
+
+    public function store(Request $request)
+    {
         $reservations = new Reservations();
         $reservation_vh = new ReservationVehicle();
-        
-        $validation = $request->validate([
-            "rs_voucher"=>"required",
-            "rs_travel_type"=>"required",
-            "rs_approval_status"=>"required",
-            "rs_status"=>"required",
-            "event_id"=>"required",
-            "driver_id"=>"required",
-            "vehicle_id"=>"required",
-            "requestor_id"=>"required",
-            "rs_passengers"=>"required",
-        ],
-        [
-            "required"=>"This field is required",
-        ]);
+
+        $validation = $request->validate(
+            [
+                "rs_voucher" => "required",
+                "rs_travel_type" => "required",
+                "rs_approval_status" => "required",
+                "rs_status" => "required",
+                "event_id" => "required",
+                "driver_id" => "required",
+                "vehicle_id" => "required",
+                "requestor_id" => "required",
+                "rs_passengers" => "required",
+            ],
+            [
+                "required" => "This field is required",
+            ]
+        );
 
         $reservations->rs_voucher = $request->rs_voucher;
         $reservations->rs_travel_type = $request->rs_travel_type;
@@ -96,172 +172,171 @@ class ReservationsController extends Controller
         $reservations->event_id = $request->event_id;
         $reservations->requestor_id = $request->requestor_id;
         $reservations->rs_passengers = $request->rs_passengers;
-        $cancelled =  Reservations::where([['rs_cancelled',0],['event_id',$request->event_id]])->latest()->first();
+        $cancelled =  Reservations::where([['rs_cancelled', 0], ['event_id', $request->event_id]])->latest()->first();
         // dd($cancelled);
-        if($cancelled){
+        if ($cancelled) {
             $cancelled_reservation = Reservations::find($cancelled->reservation_id);
             $cancelled_reservation->rs_cancelled = True;
             $cancelled_reservation->save();
         }
         $reservations->save();
 
-        
+
         $vehicle_ids = $request->vehicle_id;
         $driver_ids = $request->driver_id;
         $count = count($vehicle_ids);
-        
+
         for ($i = 0; $i < $count; $i++) {
             $reservation_vh = new ReservationVehicle();
             $reservation_vh->reservation_id = $reservations->reservation_id;
-            $reservation_vh->vehicle_id = $vehicle_ids[$i]; 
+            $reservation_vh->vehicle_id = $vehicle_ids[$i];
 
             if (isset($driver_ids[$i])) {
                 $reservation_vh->driver_id = $driver_ids[$i];
             }
-            
+
             $reservation_vh->save();
         }
         return response()->json(['success' => 'Reservation successfully recorded']);
     }
 
-    
+
     public function update(Request $request)
-    {    
+    {
         $id = $request->hidden_id;
-  
         $reservations = Reservations::findOrFail($id);
+        // dd($reservations);
         $reservations->event_id = $request->event_edit;
         $reservations->requestor_id = $request->requestor_edit;
         $reservations->rs_voucher = $request->voucher_edit;
         $reservations->rs_travel_type = $request->travel_edit;
         $reservations->rs_approval_status = $request->approval_status_edit;
         $reservations->rs_status = $request->status_edit;
-        $cancelled =  Reservations::where([['rs_cancelled',0],['event_id',$request->event_edit]])->latest()->first();
+        $cancelled =  Reservations::where([['rs_cancelled', 0], ['event_id', $request->event_edit]])->latest()->first();
         // dd($cancelled);
-        if($cancelled!=null){
+        if ($cancelled != null) {
             $cancelled_reservation = Reservations::find($cancelled->reservation_id);
             $cancelled_reservation->rs_cancelled = True;
             $cancelled_reservation->save();
             // dd($cancelled_reservation);
         }
         $reservations->save();
-
-
-
         $reservation_id = $reservations->reservation_id;
         $vehicle_id_edit = $request->vehicle_edit;
         $driver_id_edit = $request->driver_edit;
 
-        $deleteData = ReservationVehicle::where('reservation_id',$id)->whereNotIn('vehicle_id',$vehicle_id_edit)->delete();
-        $driver_id_count = ($driver_id_edit===null)? 0: (count($driver_id_edit));
+        // $deleteData = ReservationVehicle::where('reservation_id',$id)->whereNotIn('vehicle_id',$vehicle_id_edit)->delete();
+        $driver_id_count = ($driver_id_edit === null) ? 0 : (count($driver_id_edit));
 
-        foreach($vehicle_id_edit as $index => $vehicle_id)
-        {
-        $exist=ReservationVehicle::where([['vehicle_id',$vehicle_id],['reservation_id',$id]])->exists();
+        foreach ($vehicle_id_edit as $index => $vehicle_id) {
+            $exist = ReservationVehicle::where([['vehicle_id', $vehicle_id], ['reservation_id', $id]])->exists();
 
-        if($exist){
-            $reservation_vh_id=ReservationVehicle::where([['vehicle_id',$vehicle_id],['reservation_id',$id]])->first()->id;
-            $reservation_vh = ReservationVehicle::find($reservation_vh_id);
+            if ($exist) {
+                $reservation_vh_id = ReservationVehicle::where([['vehicle_id', $vehicle_id], ['reservation_id', $id]])->first()->id;
+                $reservation_vh = ReservationVehicle::find($reservation_vh_id);
 
-            if($index<$driver_id_count){
-            $reservation_vh->driver_id = $driver_id_edit[$index];
-            }else{
-                $reservation_vh->driver_id = null;
+                if ($index < $driver_id_count) {
+                    $reservation_vh->driver_id = $driver_id_edit[$index];
+                } else {
+                    $reservation_vh->driver_id = null;
+                }
+                $reservation_vh->save();
+            } else {
+                $driver_id = null;
+                if ($index < $driver_id_count) {
+                    $driver_id = $driver_id_edit[$index];
+                }
+                ReservationVehicle::create([
+                    "reservation_id" => $id,
+                    "vehicle_id" => $vehicle_id,
+                    "driver_id" => $driver_id
+
+                ]);
             }
-            $reservation_vh->save();
-        }else{
-            $driver_id=null;
-            if($index<$driver_id_count){
-                $driver_id = $driver_id_edit[$index];
-            }
-            ReservationVehicle::create([
-                "reservation_id"=>$id,
-                "vehicle_id"=>$vehicle_id,
-                "driver_id"=>$driver_id
-            ]);
         }
-        }
-    
+
         return response()->json(['success' => 'Reservation successfully updated']);
     }
-    
-    public function edit($reservation_id)   
-    {   
+
+    public function edit($reservation_id)
+    {
         if (request()->ajax()) {
-            $data = Reservations::with("reservation_vehicles","reservation_vehicles.vehicles","reservation_vehicles.drivers")->select('reservations.*', 'events.ev_name', 'requestors.rq_full_name')
+            $data = Reservations::with("reservation_vehicles", "reservation_vehicles.vehicles", "reservation_vehicles.drivers")->select('reservations.*', 'events.ev_name', 'requestors.rq_full_name')
                 ->join('events', 'reservations.event_id', '=', 'events.event_id')
                 ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id')
                 ->findOrFail($reservation_id);
-                     
+
             return response()->json(['result' => $data]);
         }
-
     }
-    public function delete($reservation_id){
+    public function delete($reservation_id)
+    {
         $data = Reservations::findOrFail($reservation_id);
         $data->delete();
         return response()->json(['success' => 'Vehicle successfully Deleted']);
     }
-    public function cancel($reservation_id){
+    public function cancel($reservation_id)
+    {
         $reservation = Reservations::findOrFail($reservation_id);
         $reservation->rs_status = 'Cancelled';
         $reservation->save();
         return response()->json(['success' => 'Reservation successfully Cancelled']);
     }
-    
-    public function reservations_word(Request $request){
 
-        $reservations = DB::table('reservations')
+    public function reservations_word(Request $request)
+    {
+
+        $reservations = DB::table('reservations')->with("reservation_vehicles", "reservation_vehicles.vehicles",         "reservation_vehicles.drivers")
             ->select('reservations.*', 'events.ev_name', 'drivers.dr_fname', 'vehicles.vh_brand', 'vehicles.vh_plate', 'requestors.rq_full_name', 'reservations.created_at', 'reservations.rs_approval_status', 'reservations.rs_status')
             ->join('events', 'reservations.event_id', '=', 'events.event_id')
             // ->join('drivers', 'reservations.driver_id', '=', 'drivers.driver_id')
             // ->join('vehicles', 'reservations.vehicle_id', '=', 'vehicles.vehicle_id')
             ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id');
-            
-            if ($request->has('search')) {
-                $searchValue = $request->input('search');
-                $reservations->where(function ($query) use ($searchValue) {
-                    $query->where('ev_name', 'like', '%' . $searchValue . '%')
-                        // ->orWhere('dr_fname', 'like', '%' . $searchValue . '%')
-                        // ->orWhere('vh_brand', 'like', '%' . $searchValue . '%')
-                        ->orWhere('rq_full_name', 'like', '%' . $searchValue . '%')
-                        ->orWhere('rs_voucher', 'like', '%' . $searchValue . '%')
-                        ->orWhere('rs_approval_status', 'like', '%' . $searchValue . '%')
-                        ->orWhere('rs_status', 'like', '%' . $searchValue . '%')
-                        ->orWhere('rs_travel_type', 'like', '%' . $searchValue . '%');
-                });
-            }
-            $filteredReservations = $reservations->get();
-            $rows = $filteredReservations->count();
 
-            $templateProcessor = new TemplateProcessor(public_path().'\\'."Reservations.docx");
-    
+        if ($request->has('search')) {
+            $searchValue = $request->input('search');
+            $reservations->where(function ($query) use ($searchValue) {
+                $query->where('ev_name', 'like', '%' . $searchValue . '%')
+                    ->orWhere('dr_fname', 'like', '%' . $searchValue . '%')
+                    ->orWhere('vh_brand', 'like', '%' . $searchValue . '%')
+                    ->orWhere('rq_full_name', 'like', '%' . $searchValue . '%')
+                    ->orWhere('rs_voucher', 'like', '%' . $searchValue . '%')
+                    ->orWhere('rs_approval_status', 'like', '%' . $searchValue . '%')
+                    ->orWhere('rs_status', 'like', '%' . $searchValue . '%')
+                    ->orWhere('rs_travel_type', 'like', '%' . $searchValue . '%');
+            });
+        }
+        $filteredReservations = $reservations->get();
+        $rows = $filteredReservations->count();
+
+        $templateProcessor = new TemplateProcessor(public_path() . '\\' . "Reservations.docx");
+
         $templateProcessor->cloneRow('reservation_id', $rows);
 
-        for($i=0;$i<$rows;$i++){
-            $reservation=$filteredReservations[$i];
+        for ($i = 0; $i < $rows; $i++) {
+            $reservation = $filteredReservations[$i];
             $formattedDate = Carbon::parse($reservation->created_at)->format('F j, Y');
-            $templateProcessor->setValue("reservation_id#".($i+1), $reservation->reservation_id);
-            $templateProcessor->setValue("event_id#".($i+1), $reservation->ev_name);
-            $templateProcessor->setValue("driver_id#".($i+1), $reservation->dr_fname);
-            $templateProcessor->setValue("vehicle_id#".($i+1), $reservation->vh_brand);
-            $templateProcessor->setValue("requestor_id#".($i+1),  $reservation->rq_full_name);
-            $templateProcessor->setValue("rs_voucher#".($i+1), $reservation->rs_voucher);
-            $templateProcessor->setValue("rs_travel_type#".($i+1), $reservation->rs_travel_type);
-            $templateProcessor->setValue("created_at#".($i+1), $formattedDate);
-            $templateProcessor->setValue("rs_approval_status#".($i+1), $reservation->rs_approval_status);
-            $templateProcessor->setValue("rs_status#".($i+1), $reservation->rs_status);
+            $templateProcessor->setValue("reservation_id#" . ($i + 1), $reservation->reservation_id);
+            $templateProcessor->setValue("event_id#" . ($i + 1), $reservation->ev_name);
+            $templateProcessor->setValue("driver_id#" . ($i + 1), $reservation->dr_fname);
+            $templateProcessor->setValue("vehicle_id#" . ($i + 1), $reservation->vh_brand);
+            $templateProcessor->setValue("requestor_id#" . ($i + 1),  $reservation->rq_full_name);
+            $templateProcessor->setValue("rs_voucher#" . ($i + 1), $reservation->rs_voucher);
+            $templateProcessor->setValue("rs_travel_type#" . ($i + 1), $reservation->rs_travel_type);
+            $templateProcessor->setValue("created_at#" . ($i + 1), $formattedDate);
+            $templateProcessor->setValue("rs_approval_status#" . ($i + 1), $reservation->rs_approval_status);
+            $templateProcessor->setValue("rs_status#" . ($i + 1), $reservation->rs_status);
         }
-    
-        $templateProcessor->saveAs(public_path().'\\'."WordDownloads\sample_downloads.docx");
-        return response()->download(public_path().'\\'."WordDownloads\sample_downloads.docx", "ReservationsList.docx")->deleteFileAfterSend(true);
+
+        $templateProcessor->saveAs(public_path() . '\\' . "WordDownloads\sample_downloads.docx");
+        return response()->download(public_path() . '\\' . "WordDownloads\sample_downloads.docx", "ReservationsList.docx")->deleteFileAfterSend(true);
     }
 
     public function reservations_excel(Request $request)
     {
         $templateFilePath = 'Reservations.xlsx';
         $spreadsheet = new Spreadsheet();
-        
+
         // Retrieve filtered reservations based on the search value
         $filteredReservationsQuery = DB::table('reservations')
             ->select('reservations.*', 'events.ev_name', 'drivers.dr_fname', 'vehicles.vh_brand', 'vehicles.vh_plate', 'requestors.rq_full_name')
@@ -269,7 +344,7 @@ class ReservationsController extends Controller
             ->join('drivers', 'reservations.driver_id', '=', 'drivers.driver_id')
             ->join('vehicles', 'reservations.vehicle_id', '=', 'vehicles.vehicle_id')
             ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id');
-    
+
         // Apply search filter if a search value is provided
         if ($request->has('search')) {
             $searchValue = $request->input('search');
@@ -284,16 +359,16 @@ class ReservationsController extends Controller
                     ->orWhere('rs_travel_type', 'like', '%' . $searchValue . '%');
             });
         }
-    
+
         // Execute the query to get filtered reservations
         $filteredReservations = $filteredReservationsQuery->get();
         // dd($filteredReservations);
         $spreadsheet = IOFactory::load($templateFilePath);
         $sheet = $spreadsheet->getActiveSheet();
-    
+
         // Populate spreadsheet with filtered reservation data
         foreach ($filteredReservations as $index => $reservation) {
-            $rowIndex = $index + 2; 
+            $rowIndex = $index + 2;
             $formattedDate = Carbon::parse($reservation->created_at)->format('F j, Y');
             $sheet->setCellValue('A' . $rowIndex, $reservation->reservation_id);
             $sheet->setCellValue('B' . $rowIndex, $reservation->ev_name);
@@ -306,12 +381,12 @@ class ReservationsController extends Controller
             $sheet->setCellValue('I' . $rowIndex, $reservation->rs_approval_status);
             $sheet->setCellValue('J' . $rowIndex, $reservation->rs_status);
         }
-    
+
         // Save and download the spreadsheet
         $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
         $fileName = 'Lakbay_Reservations.xlsx';
         $writer->save($fileName);
-    
+
         return response()->download($fileName)->deleteFileAfterSend(true);
     }
     public function reservations_pdf(Request $request)
@@ -322,7 +397,7 @@ class ReservationsController extends Controller
             ->join('drivers', 'reservations.driver_id', '=', 'drivers.driver_id')
             ->join('vehicles', 'reservations.vehicle_id', '=', 'vehicles.vehicle_id')
             ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id');
-    
+
         if ($request->has('search')) {
             $searchValue = $request->input('search');
             $filteredReservationsQuery->where(function ($query) use ($searchValue) {
@@ -339,12 +414,12 @@ class ReservationsController extends Controller
 
         $filteredReservations = $filteredReservationsQuery->get();
         $phpWord = new PhpWord();
-    
+
         // Load the template
         $templateProcessor = new TemplateProcessor(public_path('Reservations.docx'));
-    
+
         $rows = $filteredReservations->count();
-    
+
         $templateProcessor->cloneRow('reservation_id', $rows);
         foreach ($filteredReservations as $index => $reservation) {
             $templateProcessor->setValue("reservation_id#" . ($index + 1), $reservation->reservation_id);
@@ -358,32 +433,44 @@ class ReservationsController extends Controller
             $templateProcessor->setValue("rs_approval_status#" . ($index + 1), $reservation->rs_approval_status);
             $templateProcessor->setValue("rs_status#" . ($index + 1), $reservation->rs_status);
         }
-    
-        $wordFilePath = public_path().'\\'."WordDownloads\\reservations_list.docx";
-        $pdfFilePath = public_path().'\\'."PdfDownloads\\reservations_list.pdf";
-    
+
+        $wordFilePath = public_path() . '\\' . "WordDownloads\\reservations_list.docx";
+        $pdfFilePath = public_path() . '\\' . "PdfDownloads\\reservations_list.pdf";
+
         $templateProcessor->saveAs($wordFilePath);
 
-         // Load Word document
-         $phpWord = \PhpOffice\PhpWord\IOFactory::load($wordFilePath); 
-           
-       // Set up Dompdf renderer
-       Settings::setPdfRendererPath(base_path('vendor/dompdf/dompdf'));
-       Settings::setPdfRendererName('DomPDF');
-    
+        // Load Word document
+        $phpWord = \PhpOffice\PhpWord\IOFactory::load($wordFilePath);
+
+        // Set up Dompdf renderer
+        Settings::setPdfRendererPath(base_path('vendor/dompdf/dompdf'));
+        Settings::setPdfRendererName('DomPDF');
+
         // Save PDF file
         $pdfWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'PDF');
         $pdfWriter->save($pdfFilePath);
-     
+
         // Delete the Word file
         unlink($wordFilePath);
 
         // Return response for PDF download
-         return response()->download($pdfFilePath, "ReservationsList.pdf")->deleteFileAfterSend(true);
+        return response()->download($pdfFilePath, "ReservationsList.pdf")->deleteFileAfterSend(true);
     }
-    public function reservations_archive(){
-        
+    public function reservations_archive()
+    {
+    }
+    public function test_select()
+    {
+
+        return view('test_select');
+    }
+    public function test_return()
+    {
+        $driversInsert = DB::table('drivers')
+            ->leftJoin('reservation_vehicles', 'drivers.driver_id', 'reservation_vehicles.driver_id')
+            ->whereNull('reservation_vehicles.driver_id')
+            ->select('drivers.driver_id', 'dr_fname')
+            ->get();
+        return response()->json($driversInsert);
     }
 }
-    
-

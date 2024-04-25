@@ -12,6 +12,7 @@ use App\Models\Drivers;
 use App\Models\Requestors;
 use App\Models\Vehicles;
 use App\Models\ReservationVehicle;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Reservations extends Model
 {

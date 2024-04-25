@@ -1,6 +1,15 @@
-<?php
-    $title_page = 'LAKBAY Reservation System';
-?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=\, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Requestors</title>
+</head>
+<body>
+    
+</body>
+</html>
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -11,7 +20,7 @@
   @include('includes.header');
     <div class="row">
         <div class="col">
-            <h4 class="text-uppercase">requestors</h4>
+            <h4 class="text-uppercase">Requestors</h4>
         </div>
     </div>
     <div class="row mb-3">
@@ -90,9 +99,12 @@
 
           <div class="form-group">
             <label for="rq_office" class="col-sm-2 control-label">Office</label>
-            <div class="col-sm-12">
-              <input type="text" class="form-control" id="rq_office" name="rq_office" placeholder="Enter Office" maxlength="50" required="">
-            </div>
+            <select class="form-select" name="rq_office" id="rq_office">
+                <option value=""disabled selected>Select Office</option>
+                @foreach ($offices as $office)
+                <option value="{{$office->off_id}}">{{ $office->off_acr }}  ({{$office->off_name}})</option>
+                @endforeach
+            </select>
           </div>       
 
           <div class="col-sm-offset-2 col-sm-10">
