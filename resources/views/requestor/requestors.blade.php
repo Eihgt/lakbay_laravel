@@ -164,20 +164,7 @@
             exportOptions: {
                 columns: ':visible'
             }
-        },
-        {
-            extend: 'copy',
-            exportOptions: {
-                columns: ':visible'
-            }
-        },
-        {
-            extend: 'csv',
-            exportOptions: {
-                columns: ':visible'
-            }
-        },
-        'colvis'
+        }
     ],
     columnDefs: [
         {

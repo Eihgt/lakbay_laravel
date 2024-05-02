@@ -19,10 +19,7 @@ class ReservationVehicle extends Model
         'reservation_id',
         'driver_id'
     ];
-    // public function reservation(): BelongsTo
-    // {
-    //     return $this->belongsTo(Reservation::class, 'reservation_id');
-    // }
+
     public function vehicles(): BelongsTo
     {
         return $this->belongsTo(Vehicles::class, 'vehicle_id');

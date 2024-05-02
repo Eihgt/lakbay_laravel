@@ -141,12 +141,9 @@
             </div>
         </div>
 <!--- DELETE MODAL --->
-
-
     </body>
 <script type="text/javascript">
     $(document).ready(function() {
-        $("#insertModal").modal("hide");
         $("#insertBtn").click(function() {
         $("#insertModal").modal("show");
     });
@@ -187,37 +184,7 @@
                     window.location.href='/offices-pdf?search='+searchValue;
                 }
         }
-        // {
-        //     extend: 'excel',
-        //     exportOptions: {
-        //         columns: ':visible'
-        //     }
-        // },
-        // {
-        //     extend: 'print',
-        //     exportOptions: {
-        //         columns: ':visible'
-        //     }
-        // },
-        // {
-        //     extend: 'pdf',
-        //     exportOptions: {
-        //         columns: ':visible'
-        //     }
-        // },
-        // {
-        //     extend: 'copy',
-        //     exportOptions: {
-        //         columns: ':visible'
-        //     }
-        // },
-        // {
-        //     extend: 'csv',
-        //     exportOptions: {
-        //         columns: ':visible'
-        //     }
-        // },
-        // 'colvis'
+
     ]
             , ajax: "{{ route('offices.show') }}"
 
@@ -249,7 +216,6 @@
         if($('#action').val() == 'Edit')
         {
             action_url = "{{ url('/update-office') }}";
-
         }
         $.ajax({
             type: 'post',
@@ -273,7 +239,6 @@
                 var errors = data.responseJSON.errors;
                 var html = '<div class="alert alert-danger">';
                     $.each(errors,function(key,value){
-                        // console.log(key);
                     });
             }
         });

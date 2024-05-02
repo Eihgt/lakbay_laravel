@@ -37,8 +37,8 @@
                                                     <select class="form-select" name="event_id" id="event_id">
                                                         <option value="" disabled selected>Select Event Name</option>
                                                     </select>
-
                                                     <span id="event_id_error"></span>
+
                                                 </div>
                                             </div>
                                             <div class="col">
@@ -53,7 +53,7 @@
                                                     <span id="driver_id_error"></span>
                                                 </div>
                                             </div>
-                                        </div>s
+                                        </div>
                                         <div class="row">
                                             <div class="col">
                                                 <div class="mb-2">
@@ -182,8 +182,9 @@
                     <div class="modal-header">
                         <h5 class="modal-title" id="ModalLabel">Edit Reservation</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
-
                     </div>
+
+
                     <div class="modal-body">
                         <div class="form-group">
                             <label>Event : </label>
@@ -271,175 +272,32 @@
 </body>
 <script type="text/javascript">
     $(document).ready(function() {
+
+        $('.vehicles-select, .drivers-select, .events-edit, .drivers-edit, .vehicles-edit').select2();
+        //Testing Unselect
+        $(".select2-selection__choice__remove").click(() => {
+            console.log('asdasd');
+        })
+        $(".select2-selection__choice__remove").click(function() {
+
+            console.log('asdasd');
+
+        });
+        $(".select2-selection__choice").click(() => {
+
+            console.log('asdasd');
+        })
+        $(".select2-selection__rendered").click(() => {
+
+
+            console.log('asdasd');
+        })
+
+
+
+
+
         var events = [];
-        //----------------------------------FUNCTIONS-----------------------------------//
-        function getEvents(data) {
-            if (data.length > 0) {
-                var selectOptions = [];
-                $.each(data, function(index, event) {
-                    selectOptions += "<option value='" + event.event_id + "'>" + event.ev_name + "</option>";
-                });
-                $('#event_id').html(selectOptions);
-            } else {
-                $('#event_id').html('<option value="" disabled selected>No events available</option>');
-            }
-        }
-
-        function editEvents(data, id) {
-            if (data.length > 0) {
-                var selectOptions = [];
-                $.each(data, function(index, events) {
-                    selectOptions += "<option value='" + events.event_id + "'>" + events.ev_name + "</option>";
-                });
-                $('#event_edit').html(selectOptions);
-                $('#event_edit').val(id);
-            } else {
-                $('#event_edit').html('<option value="" disabled selected>No events available</option>');
-            }
-        }
-
-        function editDrivers(data, ids) {
-            if (data.length > 0) {
-                var selectOptions = "";
-                $.each(data, function(index, driver) {
-                    selectOptions += "<option value='" + driver.driver_id + "'>" + driver.dr_fname + "</option>";
-                });
-                $('#driver_edit').html(selectOptions);
-                $('#driver_edit').select2().val(ids).change();
-
-            } else {
-                $('#driver_edit').html('<option value="" disabled selected>No drivers available</option>');
-            }
-        }
-
-        function editVehicles(data, ids) {
-            console.log(ids);
-            if (data.length > 0) {
-                var selectOptions = "";
-                $.each(data, function(index, vehicle) {
-                    selectOptions += "<option value='" + vehicle.vehicle_id + "'>" + vehicle.vh_brand + "</option>";
-                });
-                $('#vehicle_edit').html(selectOptions);
-                $('#vehicle_edit').select2().val(ids).change();
-            } else {
-                $('#vehicle_edit').html('<option value="" disabled selected>No vehicles available</option>');
-            }
-        }
-
-
-
-
-
-        //----------------------------------FUNCTIONS-----------------------------------//
-        // INSERT----------------------------------------------------------------------//
-        $("#insertBtn").click(function() {
-            var action_url = "{{ route('reservations.getEvents') }}";
-            $.ajax({
-                type: 'get'
-                , headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-                , url: action_url
-                , dataType: 'json'
-                , success: function(data) {
-                    // console.log(data);
-                    getEvents(data);
-                }
-                , error: function(xhr, status, error) {
-                    console.error(xhr.responseText);
-                }
-            });
-
-            $("#insertModal").modal("show");
-        });
-        // INSERT----------------------------------------------------------------------//
-        // EDIT-------------------------------------------------------------------//
-        $('#edit_reservation_modal').on('shown.bs.modal', function() {
-            $('.vehicles-select').select2();
-            $('.drivers-select').select2();
-            $('.vehicles-edit').select2();
-            $('.drivers-edit').select2();
-            $('.events-edit').select2();
-        });
-        $(document).on('click', '.edit', function(e) {
-            e.preventDefault();
-            var reservation_id = $(this).attr('id');
-            var row = table.row($(this).parents('tr')).data();
-            // console.log(row);
-            var rowVehicles = row.reservation_vehicles;
-            var vehicle_ids = rowVehicles.map((item) => {
-                return item.vehicle_id;
-            });
-
-
-            var driver_ids = rowVehicles.map((item) => {
-                return item.driver_id;
-            });
-            driver_ids = driver_ids.filter((item) => {
-                return item != null;
-            })
-
-            var vehicles = row.reservation_vehicles;
-
-            var drivers = row.reservation_vehicles;
-            var action_url = "{{ route('reservations.getEditEvents') }}";
-            $.ajax({
-                type: 'get'
-                , headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-                , url: action_url
-                , dataType: 'json'
-                , success: function(data) {
-                    console.log(data);
-                    var events = data.events;
-                    var drivers = data.drivers;
-                    var vehicles = data.vehicles;
-
-                    events.push({
-                        "event_id": row.event_id
-                        , "ev_name": row.ev_name
-                    });
-
-                    rowVehicles.forEach((item) => {
-                        vehicles.push({
-                            "vehicle_id": item.vehicles.vehicle_id
-                            , "vh_brand": item.vehicles.vh_brand
-                        , });
-                    })
-
-                    rowVehicles.forEach((item) => {
-                        drivers.push({
-                            "driver_id": item.drivers.driver_id
-                            , "dr_fname": item.drivers.dr_fname
-                        });
-                    })
-                    events.sort((a, b) =>
-                        a.ev_name.localeCompare(b.ev_name));
-
-                    drivers.sort((a, b) =>
-                        a.dr_fname.localeCompare(b.dr_fname));
-
-                    editEvents(events, row.event_id);
-                    editDrivers(drivers, driver_ids);
-                    editVehicles(vehicles, vehicle_ids);
-                }
-                , error: function(xhr, status, error) {
-                    console.error(xhr.responseText);
-                }
-            });
-
-            $('#form_result').html('');
-            $('#requestor_edit').val(row.requestor_id);
-            $('#voucher_edit').val(row.rs_voucher);
-            $('#approval_status_edit').val(row.rs_approval_status);
-            $('#status_edit').val(row.rs_status);
-            $('#hidden_id').val(reservation_id);
-            $('#edit_reservation_modal').modal('show');
-        });
-
-        // EDIT-------------------------------------------//
-
         //----------------------------------DATA TABLES---------------------------------//
         var table = $('.reservations-table').DataTable({
             lengthMenu: [
@@ -487,12 +345,12 @@
                     data: 'reservation_vehicles'
                     , render: function(data, type, row, meta) {
                         var vehicles = [];
-
                         data.forEach((item, index) => {
-                            vehicles.push(item.vehicles.vh_brand)
-                        })
-                        return vehicles.join(",").toString();
+                            vehicles.push(item.vehicles.vh_brand);
+                        });
+                        return vehicles.join(",");
                     }
+                    , name: 'reservation_vehicles.vehicles.vh_brand'
                 }
                 , {
                     data: 'reservation_vehicles'
@@ -500,15 +358,14 @@
                         var drivers = [];
                         data.forEach((item, index) => {
                             if (item.drivers != null) {
-                                drivers.push(item.drivers.dr_fname)
+                                drivers.push(item.drivers.dr_fname);
                             }
-
-                        })
-                        return drivers.join(",").toString();
+                        });
+                        return drivers.join(",");
                     }
-                },
-
-                {
+                    , name: 'reservation_vehicles.drivers.dr_fname'
+                }
+                , {
                     data: 'rq_full_name'
                     , name: 'requestors.rq_full_name'
                 }
@@ -523,7 +380,18 @@
                 , {
                     data: 'created_at'
                     , name: 'created_at'
+                    , render: function(data, type, row, meta) {
+                        var date = new Date(data);
+                        var formattedDate = date.toLocaleDateString('en-US', {
+                            year: 'numeric'
+                            , month: 'long'
+                            , day: 'numeric'
+                        });
+                        return formattedDate;
+                    }
                 }
+
+
                 , {
                     data: 'rs_approval_status'
                     , name: 'rs_approval_status'
@@ -538,9 +406,178 @@
                     , orderable: false
                     , searchable: false
                 }
-            , ]
+            ]
+            , order: [
+                [0, 'asc']
+            ]
+
         });
+
+
+
+
         //----------------------------------DATA TABLES---------------------------------//
+
+        //----------------------------------FUNCTIONS-----------------------------------//
+        function getEvents(data) {
+            if (data.length > 0) {
+                var selectOptions = [];
+                $.each(data, function(index, event) {
+                    selectOptions += "<option value='" + event.event_id + "'>" + event.ev_name + "</option>";
+                });
+                $('#event_id').html(selectOptions);
+            } else {
+                $('#event_id').html('<option value="" disabled selected>No events available</option>');
+            }
+        }
+
+        function editEvents(data, id) {
+            if (data.length > 0) {
+                var selectOptions = '';
+                $.each(data, function(index, events) {
+                    selectOptions += "<option value='" + events.event_id + "'>" + events.ev_name + "</option>";
+                });
+                $('#event_edit').html(selectOptions);
+                $('#event_edit').val(id);
+            } else {
+                $('#event_edit').html('<option value="" disabled selected>No events available</option>');
+            }
+        }
+
+        function editDrivers(data, ids) {
+            // console.log(ids);
+            if (data.length > 0) {
+                var selectOptions = [];
+                $.each(data, function(index, driver) {
+                    selectOptions += "<option value='" + driver.driver_id + "'>" + driver.dr_fname + "</option>";
+                });
+                $('#driver_edit').html(selectOptions);
+                $('#drivers-edit').select2();
+                $('#driver_edit').select2().val(ids).change();
+
+            } else {
+                $('#driver_edit').html('<option value="" disabled selected>No drivers available</option>');
+            }
+        }
+
+        function editVehicles(data, ids) {
+            // console.log(ids);
+            if (data.length > 0) {
+                var selectOptions = [];
+                $.each(data, function(index, vehicle) {
+                    selectOptions += "<option value='" + vehicle.vehicle_id + "'>" + vehicle.vh_brand + "</option>";
+                });
+                $('#vehicle_edit').html(selectOptions);
+                $('#vehicle_edit').select2().val(ids).change();
+            } else {
+                $('#vehicle_edit').html('<option value="" disabled selected>No vehicles available</option>');
+            }
+        }
+
+        //----------------------------------FUNCTIONS-----------------------------------//
+        // INSERT----------------------------------------------------------------------//
+        $("#insertBtn").click(function() {
+            var action_url = "{{ route('reservations.getEvents') }}";
+            $.ajax({
+                type: 'get'
+                , headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+                , url: action_url
+                , dataType: 'json'
+                , success: function(data) {
+                    getEvents(data);
+                }
+                , error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
+
+            $("#insertModal").modal("show");
+        });
+        // INSERT------------------------------------------------------------------//
+        // EDIT-------------------------------------------------------------------//
+        $(document).on('click', '.edit', function(e) {
+            e.preventDefault();
+            $('#reservation_edit')[0].reset();
+            var reservation_id = $(this).attr('edit-id');
+            var row = table.row($(this).parents('tr')).data();
+            // console.log(row);
+            var rowVehicles = row.reservation_vehicles;
+            var vehicle_ids = rowVehicles.map((item) => {
+                return item.vehicle_id;
+            });
+            var driver_ids = rowVehicles.map((item) => {
+                return item.driver_id;
+            });
+            driver_ids = driver_ids.filter((item) => {
+                return item != null;
+            })
+            // console.log(driver_ids);
+
+            var vehicles = row.reservation_vehicles;
+
+            var drivers = row.reservation_vehicles;
+            var action_url = "{{ route('reservations.getEditEvents') }}";
+            $.ajax({
+                type: 'get'
+                , headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+                , url: action_url
+                , dataType: 'json'
+                , success: function(data) {
+                    // console.log(data);
+                    var events = data.events;
+                    var drivers = data.drivers;
+                    var vehicles = data.vehicles;
+
+                    events.push({
+                        "event_id": row.event_id
+                        , "ev_name": row.ev_name
+                    });
+
+                    rowVehicles.forEach((item) => {
+                        vehicles.push({
+                            "vehicle_id": item.vehicles.vehicle_id
+                            , "vh_brand": item.vehicles.vh_brand
+                        , });
+                    })
+                    rowVehicles.forEach((item) => {
+                        if (item.drivers != null) {
+                            drivers.push({
+                                "driver_id": item.drivers.driver_id
+                                , "dr_fname": item.drivers.dr_fname
+                            });
+                        }
+                    })
+                    events.sort((a, b) =>
+                        a.ev_name.localeCompare(b.ev_name));
+
+                    drivers.sort((a, b) =>
+                        a.dr_fname.localeCompare(b.dr_fname));
+
+                    editEvents(events, row.event_id);
+                    editDrivers(drivers, driver_ids);
+                    editVehicles(vehicles, vehicle_ids);
+                }
+                , error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
+
+
+            $('#form_result').html('');
+            $('#requestor_edit').val(row.requestor_id);
+            $('#voucher_edit').val(row.rs_voucher);
+            $('#approval_status_edit').val(row.rs_approval_status);
+            $('#status_edit').val(row.rs_status);
+            $('#hidden_id').val(reservation_id);
+            $('#edit_reservation_modal').modal('show');
+        });
+
+        // EDIT-------------------------------------------//
+
 
         // STORE------------------------------------------------------------------- //
         $('#reservations-form').on('submit', function(event) {
@@ -559,7 +596,7 @@
                     if (data.success) {
                         html = "<div class='alert alert-info alert-dismissible fade show py-1 px-4 d-flex justify-content-between align-items-center' role='alert'><span>&#8505; &nbsp;" + data.success + "</span><button type='button' class='btn fs-4 py-0 px-0' data-bs-dismiss='alert' aria-label='Close'>&times;</button></div>";
                         $('#reservations-table').DataTable().ajax.reload();
-                        $('#reservations-form')[0].reset();
+
                         $("#insertModal").modal("hide");
                     }
                     $('#form_result').html(html);

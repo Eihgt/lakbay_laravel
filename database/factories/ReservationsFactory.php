@@ -25,7 +25,7 @@ class ReservationsFactory extends Factory
             'rs_passengers' => fake()->numberBetween(1,20),
             'rs_travel_type'=> fake()->randomElement(['Daily Travel', 'Outside Province']),
             'rs_approval_status' => fake()->randomElement(['Pending', 'Approved', 'Rejected']),
-            'rs_status' => fake()->randomElement(['Active', 'Inactive','Cancelled']),
+            'rs_status' => fake()->randomElement(['Active', 'Inactive']),
             'event_id' => fake()->numberBetween(1,50), // Assuming event_id is a foreign key
             'requestor_id' => fake()->numberBetween(1,10), // Assuming requestor_id is a foreign key
             'created_at' => fake()->dateTimeBetween('-1 year', 'now'),

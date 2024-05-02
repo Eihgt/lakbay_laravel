@@ -35,11 +35,8 @@ class ReservationsController extends Controller
                 ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id');
             return Datatables::of($data)
                 ->addIndexColumn()
-                ->addColumn('created_at', function ($data) {
-                    return $data->created_at->format('F j, Y');
-                })
                 ->addColumn('action', function ($data) {
-                    $button = '<button type="button" name="edit" id="' . $data->reservation_id . '" class="edit btn btn-primary table-btn">Edit</button>';
+                    $button = '<button type="button" name="edit" edit-id="' . $data->reservation_id . '" class="edit btn btn-primary table-btn">Edit</button>';
                     $button .= '<button type="button" name="cancel" id="' . $data->reservation_id . '" class="cancel btn btn-danger table-btn">Cancel</button>';
                     $button .= '<button type="button" name="delete" id="' . $data->reservation_id . '" class="delete btn btn-danger table-btn">Delete</button>';
                     return $button;
@@ -66,8 +63,24 @@ class ReservationsController extends Controller
 
         $events = Events::leftJoin('reservations', 'events.event_id', 'reservations.event_id')
             ->whereNull('reservations.reservation_id')
-            ->orWhere([['reservations.rs_status', 'Cancelled'], ['rs_cancelled', 0]])
-            ->orderBy('ev_name')->get();
+            ->orWhere([
+                ['reservations.rs_status', 'Cancelled'],
+                ['reservations.rs_cancelled', 0]
+            ])
+            ->orWhere(function ($query) {
+                $query->where([
+                    ['reservations.rs_status', 'Cancelled'],
+                    ['reservations.rs_cancelled', 0]
+                ])->whereNotNull('reservations.deleted_at');
+            })->orWhere(function ($query) {
+                $query->where([
+                    ['reservations.rs_status', 'Cancelled'],
+                    ['reservations.rs_cancelled', 0]
+                ])->whereNotNull('reservations.deleted_at');
+            })
+            ->orderBy('ev_name')
+            ->get();
+
 
         $requestors = DB::table('requestors')->select('requestor_id', 'rq_full_name')->get();
         // return view('reservations')->with(compact('drivers', 'vehicles', 'requestors'));
@@ -84,7 +97,6 @@ class ReservationsController extends Controller
             ->select('events.event_id', 'ev_name')
             ->orderBy('ev_name')
             ->get();
-
         $existingDriverIds = ReservationVehicle::whereNotNull('driver_id')->distinct('driver_id')->pluck('driver_id')->toArray();
         $existingVehicleIds = ReservationVehicle::pluck('vehicle_id')->toArray();
         $driversInsert = DB::table('drivers')
@@ -225,7 +237,6 @@ class ReservationsController extends Controller
         $vehicle_id_edit = $request->vehicle_edit;
         $driver_id_edit = $request->driver_edit;
 
-        // $deleteData = ReservationVehicle::where('reservation_id',$id)->whereNotIn('vehicle_id',$vehicle_id_edit)->delete();
         $driver_id_count = ($driver_id_edit === null) ? 0 : (count($driver_id_edit));
 
         foreach ($vehicle_id_edit as $index => $vehicle_id) {
@@ -265,7 +276,6 @@ class ReservationsController extends Controller
                 ->join('events', 'reservations.event_id', '=', 'events.event_id')
                 ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id')
                 ->findOrFail($reservation_id);
-
             return response()->json(['result' => $data]);
         }
     }
@@ -286,24 +296,32 @@ class ReservationsController extends Controller
     public function reservations_word(Request $request)
     {
 
-        $reservations = DB::table('reservations')->with("reservation_vehicles", "reservation_vehicles.vehicles",         "reservation_vehicles.drivers")
+        $reservations = Reservations::with("reservation_vehicles", "reservation_vehicles.vehicles", "reservation_vehicles.drivers")
             ->select('reservations.*', 'events.ev_name', 'drivers.dr_fname', 'vehicles.vh_brand', 'vehicles.vh_plate', 'requestors.rq_full_name', 'reservations.created_at', 'reservations.rs_approval_status', 'reservations.rs_status')
             ->join('events', 'reservations.event_id', '=', 'events.event_id')
-            // ->join('drivers', 'reservations.driver_id', '=', 'drivers.driver_id')
-            // ->join('vehicles', 'reservations.vehicle_id', '=', 'vehicles.vehicle_id')
-            ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id');
+            ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id')
+            ->leftJoin('reservation_vehicles', 'reservations.reservation_id', '=', 'reservation_vehicles.reservation_id')
+            ->leftJoin('vehicles', 'reservation_vehicles.vehicle_id', '=', 'vehicles.vehicle_id')
+            ->leftJoin('drivers', 'reservation_vehicles.driver_id', '=', 'drivers.driver_id');
+
+
+
 
         if ($request->has('search')) {
             $searchValue = $request->input('search');
             $reservations->where(function ($query) use ($searchValue) {
-                $query->where('ev_name', 'like', '%' . $searchValue . '%')
-                    ->orWhere('dr_fname', 'like', '%' . $searchValue . '%')
-                    ->orWhere('vh_brand', 'like', '%' . $searchValue . '%')
-                    ->orWhere('rq_full_name', 'like', '%' . $searchValue . '%')
-                    ->orWhere('rs_voucher', 'like', '%' . $searchValue . '%')
-                    ->orWhere('rs_approval_status', 'like', '%' . $searchValue . '%')
-                    ->orWhere('rs_status', 'like', '%' . $searchValue . '%')
-                    ->orWhere('rs_travel_type', 'like', '%' . $searchValue . '%');
+                $query->where('events.ev_name', 'like', '%' . $searchValue . '%')
+                    ->orWhere('requestors.rq_full_name', 'like', '%' . $searchValue . '%')
+                    ->orWhereHas('reservation_vehicles.vehicles', function ($query) use ($searchValue) {
+                        $query->where('vh_brand', 'like', '%' . $searchValue . '%');
+                    })
+                    ->orWhereHas('reservation_vehicles.drivers', function ($query) use ($searchValue) {
+                        $query->where('dr_fname', 'like', '%' . $searchValue . '%');
+                    })
+                    ->orWhere('reservations.rs_voucher', 'like', '%' . $searchValue . '%')
+                    ->orWhere('reservations.rs_approval_status', 'like', '%' . $searchValue . '%')
+                    ->orWhere('reservations.rs_status', 'like', '%' . $searchValue . '%')
+                    ->orWhere('reservations.rs_travel_type', 'like', '%' . $searchValue . '%');
             });
         }
         $filteredReservations = $reservations->get();
@@ -338,17 +356,18 @@ class ReservationsController extends Controller
         $spreadsheet = new Spreadsheet();
 
         // Retrieve filtered reservations based on the search value
-        $filteredReservationsQuery = DB::table('reservations')
-            ->select('reservations.*', 'events.ev_name', 'drivers.dr_fname', 'vehicles.vh_brand', 'vehicles.vh_plate', 'requestors.rq_full_name')
+        $reservations = Reservations::with("reservation_vehicles", "reservation_vehicles.vehicles", "reservation_vehicles.drivers")
+            ->select('reservations.*', 'events.ev_name', 'drivers.dr_fname', 'vehicles.vh_brand', 'vehicles.vh_plate', 'requestors.rq_full_name', 'reservations.created_at', 'reservations.rs_approval_status', 'reservations.rs_status')
             ->join('events', 'reservations.event_id', '=', 'events.event_id')
-            ->join('drivers', 'reservations.driver_id', '=', 'drivers.driver_id')
-            ->join('vehicles', 'reservations.vehicle_id', '=', 'vehicles.vehicle_id')
-            ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id');
+            ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id')
+            ->leftJoin('reservation_vehicles', 'reservations.reservation_id', '=', 'reservation_vehicles.reservation_id')
+            ->leftJoin('vehicles', 'reservation_vehicles.vehicle_id', '=', 'vehicles.vehicle_id')
+            ->leftJoin('drivers', 'reservation_vehicles.driver_id', '=', 'drivers.driver_id');
 
         // Apply search filter if a search value is provided
         if ($request->has('search')) {
             $searchValue = $request->input('search');
-            $filteredReservationsQuery->where(function ($query) use ($searchValue) {
+            $reservations->where(function ($query) use ($searchValue) {
                 $query->where('ev_name', 'like', '%' . $searchValue . '%')
                     ->orWhere('dr_fname', 'like', '%' . $searchValue . '%')
                     ->orWhere('vh_brand', 'like', '%' . $searchValue . '%')
@@ -361,7 +380,7 @@ class ReservationsController extends Controller
         }
 
         // Execute the query to get filtered reservations
-        $filteredReservations = $filteredReservationsQuery->get();
+        $filteredReservations = $reservations->get();
         // dd($filteredReservations);
         $spreadsheet = IOFactory::load($templateFilePath);
         $sheet = $spreadsheet->getActiveSheet();
@@ -391,16 +410,17 @@ class ReservationsController extends Controller
     }
     public function reservations_pdf(Request $request)
     {
-        $filteredReservationsQuery = DB::table('reservations')
+        $reservations = Reservations::with("reservation_vehicles", "reservation_vehicles.vehicles", "reservation_vehicles.drivers")
             ->select('reservations.*', 'events.ev_name', 'drivers.dr_fname', 'vehicles.vh_brand', 'vehicles.vh_plate', 'requestors.rq_full_name', 'reservations.created_at', 'reservations.rs_approval_status', 'reservations.rs_status')
             ->join('events', 'reservations.event_id', '=', 'events.event_id')
-            ->join('drivers', 'reservations.driver_id', '=', 'drivers.driver_id')
-            ->join('vehicles', 'reservations.vehicle_id', '=', 'vehicles.vehicle_id')
-            ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id');
+            ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id')
+            ->leftJoin('reservation_vehicles', 'reservations.reservation_id', '=', 'reservation_vehicles.reservation_id')
+            ->leftJoin('vehicles', 'reservation_vehicles.vehicle_id', '=', 'vehicles.vehicle_id')
+            ->leftJoin('drivers', 'reservation_vehicles.driver_id', '=', 'drivers.driver_id');
 
         if ($request->has('search')) {
             $searchValue = $request->input('search');
-            $filteredReservationsQuery->where(function ($query) use ($searchValue) {
+            $reservations->where(function ($query) use ($searchValue) {
                 $query->where('ev_name', 'like', '%' . $searchValue . '%')
                     ->orWhere('dr_fname', 'like', '%' . $searchValue . '%')
                     ->orWhere('vh_brand', 'like', '%' . $searchValue . '%')
@@ -412,7 +432,7 @@ class ReservationsController extends Controller
             });
         }
 
-        $filteredReservations = $filteredReservationsQuery->get();
+        $filteredReservations = $reservations->get();
         $phpWord = new PhpWord();
 
         // Load the template
