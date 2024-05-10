@@ -79,6 +79,7 @@
                                         <div class="mb-2">
                                             <label for="rs_approval_status" class="form-label mb-0">Approval Status</label>
                                             <select class="form-control select2" name="vehicle_id[]" id="vehicle_id" multiple>
+                                                <option value="" disabled selected>Select Event Name</option>
                                                 <option value="1">Option 1</option>
                                                 <option value="2">Option 2</option>
                                                 <option value="3">Option 3</option>

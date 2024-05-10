@@ -35,7 +35,7 @@
                                                 <div class="mb-2">
                                                     <label for="event_id" class="form-label mb-0">Event Name</label>
                                                     <select class="form-select" name="event_id" id="event_id">
-                                                        <option value="" disabled selected>Select Event Name</option>
+                                                    
                                                     </select>
                                                     <span id="event_id_error"></span>
 
@@ -45,7 +45,7 @@
                                                 <div class="mb-2">
                                                     <label for="driver_id" class="form-label mb-0">Driver</label>
                                                     <select class="form-select drivers-select" name="driver_id[]" id="driver_id" multiple>
-                                                        <option value="" disabled selected>Select driver</option>
+                                                        
                                                         @foreach ($drivers as $driver)
                                                         <option value="{{$driver->driver_id}}">{{ $driver->dr_fname }}</option>
                                                         @endforeach
@@ -59,7 +59,7 @@
                                                 <div class="mb-2">
                                                     <label for="vehicle_id" class="form-label mb-0">Vehicle</label>
                                                     <select class="form-select vehicles-select" name="vehicle_id[]" id="vehicle_id" multiple>
-                                                        <option value="" disabled selected>Select Vehicle</option>
+                                                     
                                                         @foreach ($vehicles as $vehicle)
                                                         <option value="{{ $vehicle->vehicle_id }}">{{ $vehicle->vh_brand }}-{{ $vehicle->vh_plate }}-{{$vehicle->vh_capacity}}</option>
                                                         @endforeach
@@ -272,8 +272,12 @@
 </body>
 <script type="text/javascript">
     $(document).ready(function() {
+        $('.vehicles-select').select2({
+            placeholder: 'Select drivers', 
+            allowClear: true 
+        });
+        $('.drivers-select, .events-edit, .drivers-edit, .vehicles-edit').select2();
 
-        $('.vehicles-select, .drivers-select, .events-edit, .drivers-edit, .vehicles-edit').select2();
         //Testing Unselect
         $(".select2-selection__choice__remove").click(() => {
             console.log('asdasd');
@@ -390,8 +394,6 @@
                         return formattedDate;
                     }
                 }
-
-
                 , {
                     data: 'rs_approval_status'
                     , name: 'rs_approval_status'

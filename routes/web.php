@@ -80,6 +80,8 @@ Route::get('/offices-pdf', [OfficesController::class, 'offices_pdf']);
 //End
 //Reservation Section
 Route::get('/reservations', [ReservationsController::class,'show'])->name('reservations.show');
+Route::get('/event-calendar', [ReservationsController::class, 'event_calendar']);
+Route::get('/driver-schedules', [ReservationsController::class, 'drivers_schedules']);
 Route::get('/get-events', [ReservationsController::class,'events'])->name('reservations.getEvents');
 Route::get('/get-edit-events', [ReservationsController::class, 'events_edit'])->name('reservations.getEditEvents');
 Route::get('/reservations-archive', [ReservationsController::class, 'reservations_archive']);

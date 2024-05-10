@@ -109,7 +109,7 @@ class OfficesController extends Controller
         return response()->json(['success' => 'Data is successfully updated']);
         
     }
-    public function events_word(Request $request){
+    public function offices_word(Request $request){
 
         $offices = DB::table('offices')
             ->select('offices.*');

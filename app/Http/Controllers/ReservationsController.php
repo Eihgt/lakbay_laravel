@@ -86,6 +86,44 @@ class ReservationsController extends Controller
         // return view('reservations')->with(compact('drivers', 'vehicles', 'requestors'));
         return view('reservations')->with(compact('events', 'drivers', 'vehicles', 'requestors'));
     }
+    public function event_calendar()
+    {
+        $colors = ['#d5c94c', '#4522ea', '#45a240', '#7c655a', '#cf4c11']; // Example colors
+
+        $events = Events::all()->map(function ($event) use ($colors) {
+            return [
+                'title' => $event->ev_name,
+                'start' => $event->ev_date_start,
+                'end' => $event->ev_date_end,
+                'color' => $colors[array_rand($colors)],
+            ];
+        });
+
+        return view('event_calendar')->with(compact('events'));
+    }
+    public function drivers_schedules()
+    {
+        // $reservations = Reservations::with("events")
+        //     ->select('reservations.*', 'events.ev_name', 'events.ev_date_start','events.event_id')
+        //     ->join('events', 'reservations.event_id', '=', 'events.event_id')
+        //     ->get();
+
+        
+        $reservations = Reservations::with("reservation_vehicles", "reservation_vehicles.vehicles", "reservation_vehicles.drivers", "events")
+            ->select('reservations.*', 'events.ev_name', 'events.ev_date_start', 'drivers.dr_fname', 'vehicles.vh_brand', 'vehicles.vh_plate', 'requestors.rq_full_name', 'reservations.created_at', 'reservations.rs_approval_status', 'reservations.rs_status')
+            ->join('events', 'reservations.event_id', '=', 'events.event_id')
+            ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id')
+            ->leftJoin('reservation_vehicles', 'reservations.reservation_id', '=', 'reservation_vehicles.reservation_id')
+            ->leftJoin('vehicles', 'reservation_vehicles.vehicle_id', '=', 'vehicles.vehicle_id')
+            ->leftJoin('drivers', 'reservation_vehicles.driver_id', '=', 'drivers.driver_id')
+            ->get();
+
+
+        $drivers = Drivers::all();
+        $existingVehicleIds = ReservationVehicle::pluck('driver_id')->toArray();
+        return view('drivers_schedule')->with(compact('drivers', 'reservations'));
+    }
+
     public function events()
     {
         $eventsInsert = Events::leftJoin('reservations', 'events.event_id', 'reservations.event_id')
@@ -297,7 +335,7 @@ class ReservationsController extends Controller
     {
 
         $reservations = Reservations::with("reservation_vehicles", "reservation_vehicles.vehicles", "reservation_vehicles.drivers")
-            ->select('reservations.*', 'events.ev_name', 'drivers.dr_fname', 'vehicles.vh_brand', 'vehicles.vh_plate', 'requestors.rq_full_name', 'reservations.created_at', 'reservations.rs_approval_status', 'reservations.rs_status')
+            ->select('reservations.*', 'events.ev_name', 'drivers.dr_fname', 'drivers.dr_mname', 'drivers.dr_lname', 'vehicles.vh_brand', 'vehicles.vh_plate', 'requestors.rq_full_name', 'reservations.created_at', 'reservations.rs_approval_status', 'reservations.rs_status')
             ->join('events', 'reservations.event_id', '=', 'events.event_id')
             ->join('requestors', 'reservations.requestor_id', '=', 'requestors.requestor_id')
             ->leftJoin('reservation_vehicles', 'reservations.reservation_id', '=', 'reservation_vehicles.reservation_id')
@@ -320,6 +358,7 @@ class ReservationsController extends Controller
                     })
                     ->orWhere('reservations.rs_voucher', 'like', '%' . $searchValue . '%')
                     ->orWhere('reservations.rs_approval_status', 'like', '%' . $searchValue . '%')
+                    ->orWhere('reservations.created_at', 'like', '%' . $searchValue . '%')
                     ->orWhere('reservations.rs_status', 'like', '%' . $searchValue . '%')
                     ->orWhere('reservations.rs_travel_type', 'like', '%' . $searchValue . '%');
             });
@@ -336,7 +375,7 @@ class ReservationsController extends Controller
             $formattedDate = Carbon::parse($reservation->created_at)->format('F j, Y');
             $templateProcessor->setValue("reservation_id#" . ($i + 1), $reservation->reservation_id);
             $templateProcessor->setValue("event_id#" . ($i + 1), $reservation->ev_name);
-            $templateProcessor->setValue("driver_id#" . ($i + 1), $reservation->dr_fname);
+            $templateProcessor->setValue("driver_id#" . ($i + 1), $reservation->dr_fname . " " . $reservation->dr_lname);
             $templateProcessor->setValue("vehicle_id#" . ($i + 1), $reservation->vh_brand);
             $templateProcessor->setValue("requestor_id#" . ($i + 1),  $reservation->rq_full_name);
             $templateProcessor->setValue("rs_voucher#" . ($i + 1), $reservation->rs_voucher);
@@ -372,6 +411,7 @@ class ReservationsController extends Controller
                     ->orWhere('dr_fname', 'like', '%' . $searchValue . '%')
                     ->orWhere('vh_brand', 'like', '%' . $searchValue . '%')
                     ->orWhere('rq_full_name', 'like', '%' . $searchValue . '%')
+                    ->orWhere('reservations.created_at', 'like', '%' . $searchValue . '%')
                     ->orWhere('rs_voucher', 'like', '%' . $searchValue . '%')
                     ->orWhere('rs_approval_status', 'like', '%' . $searchValue . '%')
                     ->orWhere('rs_status', 'like', '%' . $searchValue . '%')
@@ -425,6 +465,7 @@ class ReservationsController extends Controller
                     ->orWhere('dr_fname', 'like', '%' . $searchValue . '%')
                     ->orWhere('vh_brand', 'like', '%' . $searchValue . '%')
                     ->orWhere('rq_full_name', 'like', '%' . $searchValue . '%')
+                    ->orWhere('reservations.created_at', 'like', '%' . $searchValue . '%')
                     ->orWhere('rs_voucher', 'like', '%' . $searchValue . '%')
                     ->orWhere('rs_approval_status', 'like', '%' . $searchValue . '%')
                     ->orWhere('rs_status', 'like', '%' . $searchValue . '%')
@@ -442,6 +483,7 @@ class ReservationsController extends Controller
 
         $templateProcessor->cloneRow('reservation_id', $rows);
         foreach ($filteredReservations as $index => $reservation) {
+            $formattedDate = Carbon::parse($reservation->created_at)->format('F j, Y');
             $templateProcessor->setValue("reservation_id#" . ($index + 1), $reservation->reservation_id);
             $templateProcessor->setValue("event_id#" . ($index + 1), $reservation->ev_name);
             $templateProcessor->setValue("driver_id#" . ($index + 1), $reservation->dr_fname);
@@ -449,7 +491,7 @@ class ReservationsController extends Controller
             $templateProcessor->setValue("requestor_id#" . ($index + 1), $reservation->rq_full_name);
             $templateProcessor->setValue("rs_voucher#" . ($index + 1), $reservation->rs_voucher);
             $templateProcessor->setValue("rs_travel_type#" . ($index + 1), $reservation->rs_travel_type);
-            $templateProcessor->setValue("created_at#" . ($index + 1), $reservation->created_at);
+            $templateProcessor->setValue("created_at#" . ($index + 1), $formattedDate);
             $templateProcessor->setValue("rs_approval_status#" . ($index + 1), $reservation->rs_approval_status);
             $templateProcessor->setValue("rs_status#" . ($index + 1), $reservation->rs_status);
         }

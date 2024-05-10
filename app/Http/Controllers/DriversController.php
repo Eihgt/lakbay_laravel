@@ -155,7 +155,7 @@ class DriversController extends Controller
             $driver = $drivers[$i];
             $templateProcessor->setValue("driver_id#" . ($i + 1), $driver->driver_id);
             $templateProcessor->setValue("dr_emp_id#" . ($i + 1), $driver->dr_emp_id);
-            $templateProcessor->setValue("dr_name#" . ($i + 1), $driver->dr_name);
+            $templateProcessor->setValue("dr_name#" . ($i + 1), $driver->dr_fname." ".$driver->dr_lname);
             $templateProcessor->setValue("dr_office#" . ($i + 1), $driver->off_name);
         }
         $templateProcessor->saveAs(public_path() . '\\' . "WordDownloads\sample_downloads.docx");

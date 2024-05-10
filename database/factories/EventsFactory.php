@@ -16,16 +16,22 @@ class EventsFactory extends Factory
      */
     public function definition(): array
     {
+        $faker = \Faker\Factory::create();
+        $dateStart = $faker->dateTimeBetween('2024-01-01', '2024-12-31');
+        $dateEnd = $faker->dateTimeBetween($dateStart, '2024-12-31');
+        $timeStart = $dateStart->format('H:i:s');
+        $timeEnd = $dateEnd->format('H:i:s');
+
         return [
-            'ev_name' => fake()->sentence(3),
-            'ev_venue' => fake()->address(),
-            'ev_date_start' => fake()->date(),
-            'ev_time_start' => fake()->time(),
-            'ev_date_end' => fake()->date(),
-            'ev_time_end' => fake()->time(),
-            'ev_date_added' => fake()->date(),
-            'created_at' => fake()->dateTimeBetween('-1 year', 'now'),
-            'updated_at' => fake()->dateTimeBetween('-1 year', 'now'),
+            'ev_name' => $faker->word(),
+            'ev_venue' => $faker->address(),
+            'ev_date_start' => $dateStart->format('Y-m-d'),
+            'ev_time_start' => $timeStart,
+            'ev_date_end' => $dateEnd->format('Y-m-d'),
+            'ev_time_end' => $timeEnd,
+            'ev_date_added' => $faker->date(),
+            'created_at' => $faker->dateTimeBetween('-1 year', 'now'),
+            'updated_at' => $faker->dateTimeBetween('-1 year', 'now'),
         ];
     }
 }
